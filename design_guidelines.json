@@ -1,0 +1,142 @@
+{
+  "identity": {
+    "name": "PLB Logistique",
+    "mission": "Simplifying logistics in Benin with speed, trust, and modern technology.",
+    "tone": "Professional, Friendly, Efficient, Approachable",
+    "target_audience": "Local businesses, individuals, and riders in Cotonou, Porto-Novo, Calavi",
+    "language": "French"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Manrope, sans-serif",
+      "body": "Inter, sans-serif",
+      "accent": "Space Grotesk, sans-serif"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-6xl font-bold tracking-tight",
+      "h2": "text-3xl md:text-5xl font-semibold tracking-tight",
+      "h3": "text-2xl md:text-3xl font-semibold",
+      "body_large": "text-lg md:text-xl leading-relaxed",
+      "body_default": "text-base leading-relaxed text-slate-600",
+      "caption": "text-sm text-slate-500 uppercase tracking-wider"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#0EA5E9",
+        "foreground": "#FFFFFF",
+        "description": "Sky Blue - Trust, Speed, Airiness"
+      },
+      "secondary": {
+        "DEFAULT": "#F1F5F9",
+        "foreground": "#0F172A",
+        "description": "Slate 100 - Soft background, clean"
+      },
+      "accent": {
+        "DEFAULT": "#F59E0B",
+        "foreground": "#FFFFFF",
+        "description": "Amber 500 - Warmth, Energy, Action (Use sparingly for CTAs)"
+      },
+      "background": {
+        "DEFAULT": "#FFFFFF",
+        "alt": "#F8FAFC"
+      },
+      "text": {
+        "primary": "#0F172A",
+        "secondary": "#475569",
+        "muted": "#94A3B8"
+      }
+    },
+    "rules": [
+      "NO dark backgrounds for main sections.",
+      "Use white cards on light grey backgrounds for depth.",
+      "Primary color is for primary actions and brand moments only.",
+      "Accent color is strictly for high-priority CTAs (e.g., 'Book Now')."
+    ]
+  },
+  "layout": {
+    "grid_system": "Mobile-first 12-column grid. Use 'grid-cols-1 md:grid-cols-12' for complex layouts.",
+    "spacing": {
+      "section_padding": "py-16 md:py-24",
+      "container_padding": "px-4 md:px-8",
+      "element_gap": "gap-6 md:gap-12"
+    },
+    "container_width": "max-w-7xl mx-auto",
+    "strategies": [
+      "Bento Grid for features: Mix of 1x1, 2x1, and 2x2 cards.",
+      "Asymmetric Hero: Text on left, large image on right with floating elements.",
+      "Cardless Lists: For simple data, use dividers instead of cards to reduce visual noise."
+    ]
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-white rounded-full px-8 py-3 hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5",
+      "secondary": "bg-white text-slate-900 border border-slate-200 rounded-full px-8 py-3 hover:bg-slate-50 transition-all",
+      "ghost": "text-slate-600 hover:text-primary hover:bg-primary/5 rounded-full px-6 py-2 transition-all"
+    },
+    "cards": {
+      "feature": "bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 group",
+      "service": "bg-slate-50 rounded-3xl p-8 hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-slate-100"
+    },
+    "inputs": {
+      "default": "bg-white border-slate-200 focus:border-primary focus:ring-primary/20 rounded-xl h-12 px-4"
+    },
+    "navigation": {
+      "style": "Floating glassmorphism header",
+      "classes": "bg-white/80 backdrop-blur-md border-b border-slate-100/50 sticky top-0 z-50"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": {
+      "soft": "shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+      "hover": "shadow-[0_8px_30px_rgb(0,0,0,0.08)]"
+    },
+    "borders": {
+      "subtle": "border border-slate-100",
+      "highlight": "border-l-4 border-primary"
+    },
+    "decorations": [
+      "Subtle geometric patterns in background (opacity 0.03).",
+      "Soft gradient blobs (Sky Blue to White) in background, heavily blurred.",
+      "Rounded corners: 'rounded-2xl' or 'rounded-3xl' for friendly feel."
+    ]
+  },
+  "media": {
+    "image_urls": {
+      "hero_rider": "https://images.pexels.com/photos/12725436/pexels-photo-12725436.jpeg",
+      "happy_customer": "https://images.unsplash.com/photo-1758874089961-e52549c294c3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGN1c3RvbWVyJTIwcmVjZWl2aW5nJTIwcGFja2FnZSUyMGRpdmVyc2V8ZW58MHx8fHwxNzY5NDQ2OTQ1fDA&ixlib=rb-4.1.0&q=85",
+      "warehouse_workers": "https://images.unsplash.com/photo-1768796373360-95d80c5830fb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHwxfHxsb2dpc3RpY3MlMjB3YXJlaG91c2UlMjB3b3JrZXJzJTIwZGl2ZXJzZXxlbnwwfHx8fDE3Njk0NDY5NDd8MA&ixlib=rb-4.1.0&q=85",
+      "delivery_box": "https://images.unsplash.com/photo-1701943896527-334158c81021?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwyfHxoYXBweSUyMGN1c3RvbWVyJTIwcmVjZWl2aW5nJTIwcGFja2FnZSUyMGRpdmVyc2V8ZW58MHx8fHwxNzY5NDQ2OTQ1fDA&ixlib=rb-4.1.0&q=85",
+      "city_vibe": "https://images.pexels.com/photos/33636676/pexels-photo-33636676.jpeg"
+    },
+    "icons": "Use 'lucide-react' for all UI icons. Use 'Box', 'Truck', 'MapPin', 'Clock', 'CheckCircle' heavily."
+  },
+  "motion": {
+    "library": "framer-motion",
+    "guidelines": [
+      "Use 'AnimatePresence' for page transitions.",
+      "Stagger children animations for lists/grids.",
+      "Hover effects: Scale up slightly (1.02) and lift shadow.",
+      "Scroll animations: Fade in and slide up (y: 20 -> y: 0)."
+    ]
+  },
+  "accessibility": {
+    "rules": [
+      "Ensure text contrast ratio is at least 4.5:1.",
+      "All images must have descriptive alt text.",
+      "Focus states must be visible (ring-2 ring-primary).",
+      "Use semantic HTML (main, section, article, aside)."
+    ]
+  },
+  "universal_guidelines": [
+    "Do not use generic 'Lorem Ipsum'. Use realistic French copy related to logistics in Benin.",
+    "Avoid dark mode entirely. The brand is strictly Light/Airy.",
+    "Use 'data-testid' on all interactive elements.",
+    "Mobile responsiveness is PRIORITY 1. Test layouts on small screens mentally.",
+    "Do not use 'Inter' for headings. Use 'Manrope'.",
+    "Use 'sonner' for all toast notifications.",
+    "Use Shadcn UI components but customize their styling to match the 'Soft/Rounded' aesthetic."
+  ],
+  "instructions_to_main_agent": "You are building the frontend for PLB Logistique. Start by setting up the global CSS and Tailwind config to match the 'colors' and 'typography' sections. Then, build the 'Home' page using the 'hero_rider' image and the 'Bento Grid' layout for features. Proceed to build the 'Delivery Request' form using Shadcn Form components. Ensure all text is in French."
+}
