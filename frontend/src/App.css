@@ -1,34 +1,127 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* PLB Logistique Custom Styles */
+
+/* Hero background pattern */
+.hero-pattern {
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 40%);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Soft shadow for cards */
+.card-soft {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.card-soft:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
-.App-link {
-    color: #61dafb;
+/* Primary button style */
+.btn-primary {
+  @apply bg-sky-500 text-white rounded-full px-8 py-3 font-medium;
+  @apply hover:bg-sky-600 transition-all duration-200;
+  @apply shadow-lg hover:shadow-xl hover:-translate-y-0.5;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.btn-secondary {
+  @apply bg-white text-slate-900 border border-slate-200 rounded-full px-8 py-3 font-medium;
+  @apply hover:bg-slate-50 transition-all duration-200;
+}
+
+/* Glass navigation */
+.nav-glass {
+  @apply bg-white/90 backdrop-blur-md border-b border-slate-100/50;
+}
+
+/* Section spacing */
+.section-padding {
+  @apply py-16 md:py-24;
+}
+
+/* Container */
+.container-custom {
+  @apply max-w-7xl mx-auto px-4 md:px-8;
+}
+
+/* Feature card */
+.feature-card {
+  @apply bg-white rounded-2xl p-8 border border-slate-100;
+  @apply shadow-soft hover:shadow-hover transition-all duration-300;
+}
+
+/* Form input styles */
+.input-custom {
+  @apply bg-white border-slate-200 focus:border-sky-500 focus:ring-sky-500/20;
+  @apply rounded-xl h-12 px-4;
+}
+
+/* Stats number */
+.stat-number {
+  @apply text-4xl md:text-5xl font-bold text-sky-500 font-heading;
+}
+
+/* Zone badges */
+.zone-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  @apply bg-sky-50 text-sky-700 border border-sky-100;
+}
+
+/* Urgency badges */
+.urgency-normal {
+  @apply bg-slate-100 text-slate-700;
+}
+
+.urgency-express {
+  @apply bg-amber-100 text-amber-700;
+}
+
+.urgency-urgent {
+  @apply bg-red-100 text-red-700;
+}
+
+/* Admin table */
+.admin-table {
+  @apply w-full text-left;
+}
+
+.admin-table th {
+  @apply px-4 py-3 bg-slate-50 text-slate-600 font-medium text-sm uppercase tracking-wider;
+}
+
+.admin-table td {
+  @apply px-4 py-3 border-b border-slate-100;
+}
+
+/* Status badges */
+.status-nouveau {
+  @apply bg-sky-100 text-sky-700 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-en_attente {
+  @apply bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-complete {
+  @apply bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+/* Loading spinner */
+.spinner {
+  @apply animate-spin h-5 w-5 border-2 border-sky-500 border-t-transparent rounded-full;
+}
+
+/* Mobile menu animation */
+.mobile-menu-enter {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
