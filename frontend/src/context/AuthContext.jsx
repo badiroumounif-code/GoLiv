@@ -28,10 +28,15 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, password }),
     });
     
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      throw new Error("Erreur de connexion");
+    }
     
     if (!response.ok) {
-      throw new Error(data.detail || "Erreur de connexion");
+      throw new Error(data.detail || "Email ou mot de passe incorrect");
     }
     
     localStorage.setItem("plb_token", data.token);
@@ -49,7 +54,12 @@ export function AuthProvider({ children }) {
       body: JSON.stringify(userData),
     });
     
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      throw new Error("Erreur d'inscription");
+    }
     
     if (!response.ok) {
       throw new Error(data.detail || "Erreur d'inscription");
