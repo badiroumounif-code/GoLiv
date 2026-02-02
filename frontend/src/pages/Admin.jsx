@@ -560,41 +560,83 @@ export default function Admin() {
                                 <Eye className="w-4 h-4" />
                               </Button>
                               
-                              {item.status === "nouveau" && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => { setSelectedItem(item); setAssignOpen(true); }}
-                                  className="rounded-full h-8 w-8 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                                  title="Assigner un livreur"
-                                >
-                                  <UserPlus className="w-4 h-4" />
-                                </Button>
-                              )}
-                              
-                              {item.status === "assigne" && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeliveryStatusUpdate(item.id, "en_cours")}
-                                  className="rounded-full h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  title="Marquer en cours"
-                                >
-                                  <Truck className="w-4 h-4" />
-                                </Button>
-                              )}
-                              
-                              {item.status === "en_cours" && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeliveryStatusUpdate(item.id, "livre")}
-                                  className="rounded-full h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                  title="Marquer comme livré"
-                                >
-                                  <CheckCircle className="w-4 h-4" />
-                                </Button>
-                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="rounded-full h-8 w-8 p-0">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  {item.status === "nouveau" && (
+                                    <DropdownMenuItem onClick={() => { setSelectedItem(item); setAssignOpen(true); }}>
+                                      <UserPlus className="w-4 h-4 mr-2 text-purple-600" />
+                                      Assigner un livreur
+                                    </DropdownMenuItem>
+                                  )}
+                                  
+                                  {item.status === "assigne" && (
+                                    <>
+                                      <DropdownMenuItem onClick={() => handleDeliveryStatusUpdate(item.id, "en_cours")}>
+                                        <Truck className="w-4 h-4 mr-2 text-blue-600" />
+                                        Marquer en cours
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleDeliveryStatusUpdate(item.id, "nouveau")}>
+                                        <RotateCcw className="w-4 h-4 mr-2 text-slate-600" />
+                                        Retirer l&apos;assignation
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                  
+                                  {item.status === "en_cours" && (
+                                    <>
+                                      <DropdownMenuItem onClick={() => handleDeliveryStatusUpdate(item.id, "livre")}>
+                                        <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                                        Marquer livré
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleDeliveryStatusUpdate(item.id, "assigne")}>
+                                        <RotateCcw className="w-4 h-4 mr-2 text-slate-600" />
+                                        Revenir à assigné
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                  
+                                  {item.status === "livre" && (
+                                    <DropdownMenuItem onClick={() => handleDeliveryStatusUpdate(item.id, "en_cours")}>
+                                      <RotateCcw className="w-4 h-4 mr-2 text-slate-600" />
+                                      Revenir à en cours
+                                    </DropdownMenuItem>
+                                  )}
+                                  
+                                  {item.status === "annule" && (
+                                    <DropdownMenuItem onClick={() => handleDeliveryStatusUpdate(item.id, "nouveau")}>
+                                      <RotateCcw className="w-4 h-4 mr-2 text-slate-600" />
+                                      Réactiver la commande
+                                    </DropdownMenuItem>
+                                  )}
+                                  
+                                  {item.status !== "annule" && item.status !== "livre" && (
+                                    <>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem 
+                                        onClick={() => handleDeliveryStatusUpdate(item.id, "annule")}
+                                        className="text-amber-600"
+                                      >
+                                        <Ban className="w-4 h-4 mr-2" />
+                                        Annuler la commande
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                  
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    onClick={() => { setSelectedItem(item); setDeleteType('delivery'); setDeleteOpen(true); }}
+                                    className="text-red-600"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Supprimer
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </td>
                         </tr>
