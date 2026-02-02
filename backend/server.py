@@ -336,6 +336,24 @@ async def register_user(data: UserRegister):
 
 @api_router.post("/auth/login")
 async def login_user(data: UserLogin):
+    # First check if this is an admin login with the legacy password
+    if data.password == ADMIN_PASSWORD:
+        # Check if an admin user exists with this email
+        admin_user = await db.users.find_one({"email": data.email.lower(), "role": "admin"}, {"_id": 0})
+        if admin_user:
+            token = create_token(admin_user["id"], admin_user["role"], admin_user.get("linked_id"))
+            return {
+                "success": True,
+                "token": token,
+                "user": {
+                    "id": admin_user["id"],
+                    "email": admin_user["email"],
+                    "role": admin_user["role"],
+                    "nom": admin_user["nom"],
+                    "linked_id": admin_user.get("linked_id")
+                }
+            }
+    
     user = await db.users.find_one({"email": data.email.lower()}, {"_id": 0})
     
     if not user:
