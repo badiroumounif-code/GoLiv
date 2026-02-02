@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { 
   Lock, LogOut, Package, MessageSquare, Store, Bike, Mail,
   Download, RefreshCw, Loader2, Star, Eye, Check, X, UserPlus,
-  TrendingUp, BarChart3, Clock, CheckCircle, Truck, AlertCircle
+  TrendingUp, BarChart3, Clock, CheckCircle, Truck, AlertCircle,
+  Trash2, RotateCcw, MoreVertical, Ban
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -23,6 +24,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Textarea } from "../components/ui/textarea";
 import { toast } from "sonner";
 import axios from "axios";
@@ -48,6 +66,9 @@ export default function Admin() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteType, setDeleteType] = useState(null); // 'merchant', 'rider', 'delivery'
+  const [deliveryStatusOpen, setDeliveryStatusOpen] = useState(false);
   const [statusType, setStatusType] = useState(null); // 'merchant' or 'rider'
   const [selectedStatus, setSelectedStatus] = useState("");
   const [statusReason, setStatusReason] = useState("");
