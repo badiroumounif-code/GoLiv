@@ -259,6 +259,18 @@ async def create_contact_message(data: ContactMessageCreate):
     message = ContactMessage(**data.model_dump())
     doc = message.model_dump()
     await db.contact_messages.insert_one(doc)
+    
+    html = f"""
+    <h2>Nouveau Message de Contact</h2>
+    <p><strong>De:</strong> {message.nom}</p>
+    <p><strong>Email:</strong> {message.email}</p>
+    <p><strong>Sujet:</strong> {message.sujet}</p>
+    <p><strong>Message:</strong></p>
+    <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">{message.message}</p>
+    <p><em>Reçu le {message.created_at}</em></p>
+    """
+    await send_notification_email(f"📩 Message de {message.nom}: {message.sujet}", html)
+    
     return message
 
 # ============ ADMIN ENDPOINTS ============
