@@ -160,6 +160,11 @@ export default function Admin() {
     localStorage.removeItem("plb_admin_password");
     setIsAuthenticated(false);
     setPassword("");
+    // Also logout from JWT if logged in
+    if (jwtAuthenticated) {
+      jwtLogout();
+    }
+    navigate("/");
     toast.info("Déconnexion réussie");
   };
 
