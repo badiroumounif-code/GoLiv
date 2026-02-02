@@ -411,6 +411,62 @@ async def update_rider_status(rider_id: str, data: StatusUpdate, password: str =
     
     return {"success": True, "message": f"Statut mis à jour: {data.status}"}
 
+# ============ DELETE ENDPOINTS ============
+
+@api_router.delete("/admin/merchants/{merchant_id}")
+async def delete_merchant(merchant_id: str, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    result = await db.merchants.delete_one({"id": merchant_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Commerçant non trouvé")
+    
+    return {"success": True, "message": "Commerçant supprimé"}
+
+@api_router.delete("/admin/riders/{rider_id}")
+async def delete_rider(rider_id: str, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    # Check if rider has active deliveries
+    active_deliveries = await db.delivery_requests.count_documents({
+        "livreur_id": rider_id,
+        "status": {"$in": ["assigne", "en_cours"]}
+    })
+    
+    if active_deliveries > 0:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Ce livreur a {active_deliveries} livraison(s) en cours. Veuillez les réassigner avant de supprimer."
+        )
+    
+    result = await db.riders.delete_one({"id": rider_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Livreur non trouvé")
+    
+    return {"success": True, "message": "Livreur supprimé"}
+
+@api_router.delete("/admin/delivery-requests/{delivery_id}")
+async def delete_delivery_request(delivery_id: str, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    delivery = await db.delivery_requests.find_one({"id": delivery_id}, {"_id": 0})
+    if not delivery:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    # If delivery was assigned, decrement rider's counter
+    if delivery.get('livreur_id') and delivery.get('status') in ['assigne', 'en_cours']:
+        await db.riders.update_one(
+            {"id": delivery['livreur_id']},
+            {"$inc": {"livraisons_en_cours": -1}}
+        )
+    
+    await db.delivery_requests.delete_one({"id": delivery_id})
+    
+    return {"success": True, "message": "Commande supprimée"}
+
 # ============ DELIVERY MANAGEMENT ============
 
 @api_router.patch("/admin/delivery-requests/{delivery_id}/assign")
