@@ -287,6 +287,35 @@ export default function Admin() {
     }
   };
 
+  // Handle delete
+  const handleDelete = async () => {
+    setActionLoading(true);
+    const pwd = localStorage.getItem("plb_admin_password");
+    
+    try {
+      let endpoint = '';
+      if (deleteType === 'merchant') {
+        endpoint = `${API}/admin/merchants/${selectedItem.id}?password=${pwd}`;
+      } else if (deleteType === 'rider') {
+        endpoint = `${API}/admin/riders/${selectedItem.id}?password=${pwd}`;
+      } else if (deleteType === 'delivery') {
+        endpoint = `${API}/admin/delivery-requests/${selectedItem.id}?password=${pwd}`;
+      }
+      
+      await axios.delete(endpoint);
+      
+      toast.success("Suppression effectuée");
+      setDeleteOpen(false);
+      setSelectedItem(null);
+      loadAllData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Erreur lors de la suppression");
+      console.error(error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const acceptedRiders = riders.filter(r => r.status === 'accepte');
 
   if (!isAuthenticated) {
