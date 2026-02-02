@@ -106,6 +106,43 @@ export default function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full px-4" data-testid="user-menu-btn">
+                    <User className="w-4 h-4 mr-2" />
+                    {user?.nom?.split(' ')[0] || getRoleLabel()}
+                    <ChevronDown className="ml-1 w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <div className="px-2 py-1.5 text-sm text-slate-500">
+                    {getRoleLabel()}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to={getDashboardPath()} className="flex items-center" data-testid="dashboard-link">
+                      <LayoutDashboard className="w-4 h-4 mr-2" />
+                      Mon espace
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-600" data-testid="logout-menu-btn">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link to="/connexion">
+                <Button variant="outline" className="rounded-full px-6" data-testid="login-btn">
+                  <User className="w-4 h-4 mr-2" />
+                  Connexion
+                </Button>
+              </Link>
+            )}
+            
             <Link to="/demande-livraison">
               <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6" data-testid="request-delivery-btn">
                 Demander une livraison
