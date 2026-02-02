@@ -14,8 +14,35 @@ import { useAuth } from "../context/AuthContext";
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  const getDashboardPath = () => {
+    if (!user) return "/connexion";
+    switch (user.role) {
+      case "admin": return "/admin";
+      case "rider": return "/espace-livreur";
+      case "merchant": return "/espace-commercant";
+      default: return "/connexion";
+    }
+  };
+
+  const getRoleLabel = () => {
+    if (!user) return "";
+    switch (user.role) {
+      case "admin": return "Admin";
+      case "rider": return "Livreur";
+      case "merchant": return "Commerçant";
+      default: return "";
+    }
+  };
 
   const navLinks = [
     { name: "Accueil", path: "/" },
