@@ -109,12 +109,19 @@ export default function Admin() {
   
   const storedPassword = localStorage.getItem("plb_admin_password");
 
+  // Check if logged in via JWT as admin
   useEffect(() => {
-    if (storedPassword) {
+    if (jwtAuthenticated && user?.role === "admin") {
+      // Use admin password for API calls
+      const adminPwd = "plb2024";
+      localStorage.setItem("plb_admin_password", adminPwd);
+      setPassword(adminPwd);
+      setIsAuthenticated(true);
+    } else if (storedPassword) {
       setPassword(storedPassword);
       setIsAuthenticated(true);
     }
-  }, [storedPassword]);
+  }, [jwtAuthenticated, user, storedPassword]);
 
   useEffect(() => {
     if (isAuthenticated) {
