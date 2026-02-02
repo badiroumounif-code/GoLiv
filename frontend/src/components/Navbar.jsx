@@ -198,6 +198,42 @@ export default function Navbar() {
                   Devenir livreur partenaire
                 </Link>
               </div>
+              
+              {/* Auth section for mobile */}
+              <div className="border-t border-slate-100 my-2 pt-2">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      to={getDashboardPath()}
+                      className="block px-4 py-3 text-sky-600 hover:bg-sky-50 rounded-xl font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4 inline mr-2" />
+                      Mon espace ({getRoleLabel()})
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl"
+                    >
+                      <LogOut className="w-4 h-4 inline mr-2" />
+                      Déconnexion
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    to="/connexion"
+                    className="block px-4 py-3 text-sky-600 hover:bg-sky-50 rounded-xl font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4 inline mr-2" />
+                    Connexion
+                  </Link>
+                )}
+              </div>
+              
               <Link
                 to="/demande-livraison"
                 className="mx-4 mt-2"
