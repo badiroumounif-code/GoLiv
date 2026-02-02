@@ -8,20 +8,22 @@ Build a fully functional, interactive logistics website for PLB Logistique, oper
 2. **Potential Merchant Partners** - Businesses looking to partner for regular deliveries
 3. **Potential Rider Partners** - Individuals looking to become delivery riders
 4. **Admin/Operations Team** - Need to view and manage all submissions
+5. **Approved Merchants** - Logged-in merchants managing their deliveries
+6. **Approved Riders** - Logged-in riders accepting and completing deliveries
 
 ## Core Requirements (Static)
 - French language only
 - Light/soft color palette (sky blue, light grey, white)
 - Mobile-first, responsive design
-- Simple password protection for admin (plb2024)
-- Email notifications for new requests (Resend integration ready)
+- JWT-based authentication for multi-user roles
+- Email notifications for new requests (Resend integration)
 - CSV export capability for all data
 
 ---
 
 ## What's Been Implemented
 
-### December 2025 - Initial MVP
+### Phase 1 - Initial MVP (Completed)
 
 **Pages Built:**
 - ✅ Home page with hero section, features, stats, testimonials
@@ -37,73 +39,140 @@ Build a fully functional, interactive logistics website for PLB Logistique, oper
 - ✅ Rider Partner Application Form
 - ✅ Contact Form
 
-**Admin Dashboard:**
-- ✅ Password-protected login (plb2024)
-- ✅ Statistics overview (demandes, avis, commerçants, livreurs)
+### Phase 2 - Admin Dashboard (Completed)
+
+- ✅ Password-protected admin login
+- ✅ Statistics overview with charts
 - ✅ Tabbed view for all data types
 - ✅ CSV export for each category
-- ✅ Detail modal for delivery requests
+- ✅ Delivery assignment to riders
+- ✅ Status management (accept/refuse merchants & riders)
+- ✅ Delivery status tracking (nouveau, assigné, en_cours, livré, annulé)
+- ✅ Delete functionality for merchants/riders/deliveries
+- ✅ Advanced filters (date, status, zone, rider, urgency)
+- ✅ Search functionality
 
-**Backend API:**
-- ✅ All CRUD endpoints for delivery requests, feedback, merchants, riders, contacts
-- ✅ Admin authentication
-- ✅ CSV export endpoints
-- ✅ Stats endpoint
-- ✅ Email notification system (requires Resend API key configuration)
+### Phase 3 - Multi-User Authentication (Completed December 2025)
 
-**Design:**
-- ✅ Light sky blue theme
-- ✅ Manrope headings + Inter body fonts
-- ✅ Rounded cards with soft shadows
-- ✅ Professional logistics imagery
-- ✅ Responsive mobile design
+**Authentication System:**
+- ✅ JWT-based authentication with role-based access
+- ✅ Three user roles: Admin, Rider (Livreur), Merchant (Commerçant)
+- ✅ Login page at `/connexion` with registration option
+- ✅ Automatic user account creation when admin accepts applications
+- ✅ Auto-generated passwords sent via email upon approval
+
+**User Dashboards:**
+- ✅ Admin Dashboard (`/admin`) - Full platform management
+- ✅ Rider Dashboard (`/espace-livreur`) - View assigned deliveries, accept/refuse, update status
+- ✅ Merchant Dashboard (`/espace-commercant`) - View orders, create new deliveries, export data
+
+**Navbar Integration:**
+- ✅ "Connexion" button when logged out
+- ✅ User menu with role label when logged in
+- ✅ "Mon espace" link to appropriate dashboard
+- ✅ Logout functionality
 
 ---
 
-## Prioritized Backlog
+## Backend API Endpoints
 
-### P0 - Critical (For Production)
-- [ ] Configure Resend API key + admin email for notifications
-- [ ] Update contact phone number and email with real values
-- [ ] Set a secure admin password
+### Public Endpoints
+- `POST /api/delivery-requests` - Create delivery request
+- `POST /api/feedback` - Submit feedback
+- `POST /api/merchants` - Apply as merchant partner
+- `POST /api/riders` - Apply as rider partner
+- `POST /api/contact` - Send contact message
 
-### P1 - High Priority
-- [ ] Add WhatsApp direct link in contact section
-- [ ] Add delivery tracking system
-- [ ] SMS notifications (Twilio integration)
-- [ ] Real-time delivery status updates
+### Authentication Endpoints
+- `POST /api/auth/login` - User login (all roles)
+- `POST /api/auth/register` - Register new user (rider/merchant only)
+- `GET /api/auth/me` - Get current user profile
+- `POST /api/auth/init-admin` - Initialize admin account (one-time)
 
-### P2 - Medium Priority
-- [ ] Multi-language support (English)
-- [ ] Customer accounts with order history
-- [ ] Advanced admin features (status updates, assign riders)
-- [ ] Payment integration (Stripe/PayPal)
+### Rider Endpoints (Protected)
+- `GET /api/rider/deliveries` - Get assigned deliveries
+- `GET /api/rider/stats` - Get rider statistics
+- `GET /api/rider/profile` - Get rider profile
+- `PATCH /api/rider/deliveries/{id}/accept` - Accept delivery
+- `PATCH /api/rider/deliveries/{id}/refuse` - Refuse delivery
+- `PATCH /api/rider/deliveries/{id}/status` - Update delivery status
 
-### P3 - Nice to Have
-- [ ] Mobile app
-- [ ] Real-time GPS tracking
-- [ ] Automated pricing calculator
-- [ ] Analytics dashboard
+### Merchant Endpoints (Protected)
+- `GET /api/merchant/deliveries` - Get merchant's orders
+- `POST /api/merchant/deliveries` - Create new delivery
+- `GET /api/merchant/stats` - Get merchant statistics
+- `GET /api/merchant/profile` - Get merchant profile
+- `GET /api/merchant/export` - Export deliveries as CSV
+
+### Admin Endpoints (Protected)
+- All `/api/admin/*` endpoints for data management
 
 ---
 
 ## Technical Architecture
 
 **Frontend:** React + Tailwind CSS + Shadcn UI + Framer Motion
-**Backend:** FastAPI (Python)
+**Backend:** FastAPI (Python) with Motor (async MongoDB)
 **Database:** MongoDB
-**Hosting:** Emergent Platform
+**Authentication:** JWT tokens with bcrypt password hashing
+**Email:** Resend API
 
 **Key Files:**
-- `/app/backend/server.py` - Main API
+- `/app/backend/server.py` - Main API with all endpoints
 - `/app/frontend/src/App.js` - React routes
-- `/app/frontend/src/pages/` - All page components
-- `/app/frontend/src/components/` - Shared components
+- `/app/frontend/src/context/AuthContext.jsx` - Authentication context
+- `/app/frontend/src/pages/LoginPage.jsx` - Login/Register page
+- `/app/frontend/src/pages/RiderDashboard.jsx` - Rider dashboard
+- `/app/frontend/src/pages/MerchantDashboard.jsx` - Merchant dashboard
+- `/app/frontend/src/pages/Admin.jsx` - Admin dashboard
+- `/app/frontend/src/components/Navbar.jsx` - Navigation with auth
+
+---
+
+## Credentials
+
+**Admin Login:**
+- Email: `admin@plb.bj`
+- Password: `plb2024`
+
+**Test Flow:**
+1. Apply as merchant/rider via public forms
+2. Admin approves application → user account auto-created
+3. User receives credentials via email
+4. User logs in to access their dashboard
+
+---
+
+## Prioritized Backlog
+
+### P0 - Critical
+- [x] Multi-user authentication system
+- [x] Rider dashboard
+- [x] Merchant dashboard
+- [ ] Configure Resend API key for production emails
+
+### P1 - High Priority
+- [ ] Real-time delivery tracking with GPS
+- [ ] Push notifications for delivery updates
+- [ ] WhatsApp integration for customer communication
+- [ ] Proof of delivery (photo upload)
+
+### P2 - Medium Priority
+- [ ] Customer accounts for tracking orders
+- [ ] Advanced analytics with charts
+- [ ] Payment integration (Mobile Money, Stripe)
+- [ ] SMS notifications (Twilio)
+
+### P3 - Nice to Have
+- [ ] Mobile app (React Native)
+- [ ] Multi-language support
+- [ ] Automated pricing calculator
+- [ ] Route optimization for riders
 
 ---
 
 ## Next Tasks
-1. Add Resend API key to enable email notifications
-2. Update contact information with real phone/email
-3. Test full user flow with real submissions
-4. Gather user feedback from initial testing phase
+1. Test the complete flow: register → admin approval → login → dashboard
+2. Configure Resend API for production email delivery
+3. Add proof of delivery photo upload for riders
+4. Implement real-time notifications
