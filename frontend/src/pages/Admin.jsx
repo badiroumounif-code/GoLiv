@@ -705,41 +705,49 @@ export default function Admin() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            {item.status === "en_attente" && (
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedItem(item);
-                                    setStatusType('rider');
-                                    setSelectedStatus('accepte');
-                                    setStatusOpen(true);
-                                  }}
-                                  className="rounded-full h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                  title="Accepter"
-                                >
-                                  <Check className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedItem(item);
-                                    setStatusType('rider');
-                                    setSelectedStatus('refuse');
-                                    setStatusOpen(true);
-                                  }}
-                                  className="rounded-full h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  title="Refuser"
-                                >
-                                  <X className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            )}
-                            {item.status !== "en_attente" && (
-                              <span className="text-xs text-slate-400">-</span>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {item.status === "en_attente" && (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedItem(item);
+                                      setStatusType('rider');
+                                      setSelectedStatus('accepte');
+                                      setStatusOpen(true);
+                                    }}
+                                    className="rounded-full h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    title="Accepter"
+                                  >
+                                    <Check className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedItem(item);
+                                      setStatusType('rider');
+                                      setSelectedStatus('refuse');
+                                      setStatusOpen(true);
+                                    }}
+                                    className="rounded-full h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    title="Refuser"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setSelectedItem(item); setDeleteType('rider'); setDeleteOpen(true); }}
+                                className="rounded-full h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                title="Supprimer"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))
