@@ -531,18 +531,56 @@ async def update_delivery_status(delivery_id: str, data: StatusUpdate, password:
     if not delivery:
         raise HTTPException(status_code=404, detail="Commande non trouvée")
     
-    update_data = {"status": data.status}
+    old_status = delivery.get('status')
+    new_status = data.status
+    update_data = {"status": new_status}
     
-    # If marking as completed, update timestamps and rider stats
-    if data.status == "livre":
-        update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+    # Handle rider stats based on status transitions
+    if delivery.get('livreur_id'):
+        rider_id = delivery['livreur_id']
         
-        if delivery.get('livreur_id'):
+        # Going FROM livre to another status (reverting completion)
+        if old_status == "livre" and new_status != "livre":
+            await db.riders.update_one(
+                {"id": rider_id},
+                {"$inc": {"total_livraisons": -1, "livraisons_en_cours": 1}}
+            )
+            update_data["completed_at"] = None
+        
+        # Going TO livre (completing)
+        elif old_status != "livre" and new_status == "livre":
+            update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+            await db.riders.update_one(
+                {"id": rider_id},
+                {"$inc": {"total_livraisons": 1, "livraisons_en_cours": -1}}
+            )
+        
+        # Going TO annule from active status (canceling)
+        elif new_status == "annule" and old_status in ["assigne", "en_cours"]:
+            await db.riders.update_one(
+                {"id": rider_id},
+                {"$inc": {"livraisons_en_cours": -1}}
+            )
+        
+        # Going FROM annule to active status (reactivating)
+        elif old_status == "annule" and new_status in ["assigne", "en_cours"]:
+            await db.riders.update_one(
+                {"id": rider_id},
+                {"$inc": {"livraisons_en_cours": 1}}
+            )
+    
+    # If going back to nouveau, remove rider assignment
+    if new_status == "nouveau":
+        update_data["livreur_id"] = None
+        update_data["livreur_nom"] = None
+        update_data["assigned_at"] = None
+        update_data["completed_at"] = None
+        
+        # Decrement rider's in-progress if was assigned/en_cours
+        if delivery.get('livreur_id') and old_status in ["assigne", "en_cours"]:
             await db.riders.update_one(
                 {"id": delivery['livreur_id']},
-                {
-                    "$inc": {"total_livraisons": 1, "livraisons_en_cours": -1}
-                }
+                {"$inc": {"livraisons_en_cours": -1}}
             )
     
     await db.delivery_requests.update_one(
@@ -550,7 +588,7 @@ async def update_delivery_status(delivery_id: str, data: StatusUpdate, password:
         {"$set": update_data}
     )
     
-    return {"success": True, "message": f"Statut mis à jour: {data.status}"}
+    return {"success": True, "message": f"Statut mis à jour: {new_status}"}
 
 # ============ ANALYTICS ============
 
