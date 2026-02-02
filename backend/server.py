@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Query, Body
 from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -7,10 +7,10 @@ import os
 import logging
 import asyncio
 from pathlib import Path
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import io
 import csv
 
@@ -55,6 +55,10 @@ class DeliveryRequest(BaseModel):
     urgence: str
     notes: Optional[str] = None
     status: str = "nouveau"
+    livreur_id: Optional[str] = None
+    livreur_nom: Optional[str] = None
+    assigned_at: Optional[str] = None
+    completed_at: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class DeliveryRequestCreate(BaseModel):
@@ -93,6 +97,7 @@ class Merchant(BaseModel):
     volume_mensuel: str
     message: Optional[str] = None
     status: str = "en_attente"
+    total_commandes: int = 0
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class MerchantCreate(BaseModel):
@@ -117,6 +122,8 @@ class Rider(BaseModel):
     disponibilite: str
     message: Optional[str] = None
     status: str = "en_attente"
+    total_livraisons: int = 0
+    livraisons_en_cours: int = 0
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class RiderCreate(BaseModel):
@@ -147,12 +154,24 @@ class ContactMessageCreate(BaseModel):
 class AdminLogin(BaseModel):
     password: str
 
+class StatusUpdate(BaseModel):
+    status: str
+    reason: Optional[str] = None
+
+class AssignRider(BaseModel):
+    livreur_id: str
+
 # ============ EMAIL HELPER ============
 
-async def send_notification_email(subject: str, html_content: str):
+async def send_notification_email(subject: str, html_content: str, to_email: str = None):
     """Send email notification using Resend"""
-    if not RESEND_API_KEY or not ADMIN_EMAIL:
-        logger.warning("Email not configured - RESEND_API_KEY or ADMIN_EMAIL missing")
+    if not RESEND_API_KEY:
+        logger.warning("Email not configured - RESEND_API_KEY missing")
+        return False
+    
+    recipient = to_email or ADMIN_EMAIL
+    if not recipient:
+        logger.warning("No recipient email configured")
         return False
     
     try:
@@ -161,7 +180,7 @@ async def send_notification_email(subject: str, html_content: str):
         
         params = {
             "from": SENDER_EMAIL,
-            "to": [ADMIN_EMAIL],
+            "to": [recipient],
             "subject": subject,
             "html": html_content
         }
@@ -177,7 +196,7 @@ async def send_notification_email(subject: str, html_content: str):
 
 @api_router.get("/")
 async def root():
-    return {"message": "PLB Logistique API", "version": "1.0"}
+    return {"message": "PLB Logistique API", "version": "2.0"}
 
 @api_router.get("/health")
 async def health_check():
@@ -192,7 +211,7 @@ async def create_delivery_request(data: DeliveryRequestCreate):
     
     # Send email notification
     html = f"""
-    <h2>Nouvelle Demande de Livraison</h2>
+    <h2>🚚 Nouvelle Demande de Livraison</h2>
     <p><strong>Client:</strong> {delivery.nom}</p>
     <p><strong>Téléphone:</strong> {delivery.telephone}</p>
     <p><strong>Zone d'enlèvement:</strong> {delivery.zone_enlevement}</p>
@@ -222,7 +241,7 @@ async def create_merchant(data: MerchantCreate):
     await db.merchants.insert_one(doc)
     
     html = f"""
-    <h2>Nouvelle Candidature Commerçant</h2>
+    <h2>🏪 Nouvelle Candidature Commerçant</h2>
     <p><strong>Entreprise:</strong> {merchant.nom_entreprise}</p>
     <p><strong>Contact:</strong> {merchant.nom_contact}</p>
     <p><strong>Téléphone:</strong> {merchant.telephone}</p>
@@ -242,7 +261,7 @@ async def create_rider(data: RiderCreate):
     await db.riders.insert_one(doc)
     
     html = f"""
-    <h2>Nouvelle Candidature Livreur</h2>
+    <h2>🏍️ Nouvelle Candidature Livreur</h2>
     <p><strong>Nom:</strong> {rider.prenom} {rider.nom}</p>
     <p><strong>Téléphone:</strong> {rider.telephone}</p>
     <p><strong>Email:</strong> {rider.email}</p>
@@ -261,7 +280,7 @@ async def create_contact_message(data: ContactMessageCreate):
     await db.contact_messages.insert_one(doc)
     
     html = f"""
-    <h2>Nouveau Message de Contact</h2>
+    <h2>📩 Nouveau Message de Contact</h2>
     <p><strong>De:</strong> {message.nom}</p>
     <p><strong>Email:</strong> {message.email}</p>
     <p><strong>Sujet:</strong> {message.sujet}</p>
@@ -315,6 +334,256 @@ async def get_contacts(password: str = Query(...)):
         raise HTTPException(status_code=401, detail="Non autorisé")
     items = await db.contact_messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return items
+
+# ============ STATUS MANAGEMENT ============
+
+@api_router.patch("/admin/merchants/{merchant_id}/status")
+async def update_merchant_status(merchant_id: str, data: StatusUpdate, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    merchant = await db.merchants.find_one({"id": merchant_id}, {"_id": 0})
+    if not merchant:
+        raise HTTPException(status_code=404, detail="Commerçant non trouvé")
+    
+    await db.merchants.update_one(
+        {"id": merchant_id},
+        {"$set": {"status": data.status}}
+    )
+    
+    # Send email notification to merchant
+    status_labels = {
+        "accepte": "✅ Acceptée",
+        "refuse": "❌ Refusée"
+    }
+    status_label = status_labels.get(data.status, data.status)
+    
+    html = f"""
+    <h2>Mise à jour de votre candidature - PLB Logistique</h2>
+    <p>Bonjour {merchant['nom_contact']},</p>
+    <p>Votre candidature en tant que commerçant partenaire pour <strong>{merchant['nom_entreprise']}</strong> a été <strong>{status_label}</strong>.</p>
+    {"<p><strong>Raison:</strong> " + data.reason + "</p>" if data.reason else ""}
+    {"<p>Bienvenue dans notre réseau ! Notre équipe vous contactera prochainement pour les prochaines étapes.</p>" if data.status == "accepte" else ""}
+    <p>Cordialement,<br>L'équipe PLB Logistique</p>
+    """
+    await send_notification_email(
+        f"PLB Logistique - Candidature {status_label}", 
+        html, 
+        merchant['email']
+    )
+    
+    return {"success": True, "message": f"Statut mis à jour: {data.status}"}
+
+@api_router.patch("/admin/riders/{rider_id}/status")
+async def update_rider_status(rider_id: str, data: StatusUpdate, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    rider = await db.riders.find_one({"id": rider_id}, {"_id": 0})
+    if not rider:
+        raise HTTPException(status_code=404, detail="Livreur non trouvé")
+    
+    await db.riders.update_one(
+        {"id": rider_id},
+        {"$set": {"status": data.status}}
+    )
+    
+    # Send email notification to rider
+    status_labels = {
+        "accepte": "✅ Acceptée",
+        "refuse": "❌ Refusée"
+    }
+    status_label = status_labels.get(data.status, data.status)
+    
+    html = f"""
+    <h2>Mise à jour de votre candidature - PLB Logistique</h2>
+    <p>Bonjour {rider['prenom']} {rider['nom']},</p>
+    <p>Votre candidature en tant que livreur partenaire a été <strong>{status_label}</strong>.</p>
+    {"<p><strong>Raison:</strong> " + data.reason + "</p>" if data.reason else ""}
+    {"<p>Bienvenue dans notre équipe ! Notre équipe vous contactera prochainement pour la formation et les prochaines étapes.</p>" if data.status == "accepte" else ""}
+    <p>Cordialement,<br>L'équipe PLB Logistique</p>
+    """
+    await send_notification_email(
+        f"PLB Logistique - Candidature {status_label}", 
+        html, 
+        rider['email']
+    )
+    
+    return {"success": True, "message": f"Statut mis à jour: {data.status}"}
+
+# ============ DELIVERY MANAGEMENT ============
+
+@api_router.patch("/admin/delivery-requests/{delivery_id}/assign")
+async def assign_delivery_to_rider(delivery_id: str, data: AssignRider, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    delivery = await db.delivery_requests.find_one({"id": delivery_id}, {"_id": 0})
+    if not delivery:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    rider = await db.riders.find_one({"id": data.livreur_id}, {"_id": 0})
+    if not rider:
+        raise HTTPException(status_code=404, detail="Livreur non trouvé")
+    
+    if rider['status'] != 'accepte':
+        raise HTTPException(status_code=400, detail="Ce livreur n'est pas encore validé")
+    
+    # Update delivery
+    await db.delivery_requests.update_one(
+        {"id": delivery_id},
+        {"$set": {
+            "status": "assigne",
+            "livreur_id": rider['id'],
+            "livreur_nom": f"{rider['prenom']} {rider['nom']}",
+            "assigned_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Update rider stats
+    await db.riders.update_one(
+        {"id": data.livreur_id},
+        {"$inc": {"livraisons_en_cours": 1}}
+    )
+    
+    # Notify rider by email
+    html = f"""
+    <h2>🚚 Nouvelle Livraison Assignée</h2>
+    <p>Bonjour {rider['prenom']},</p>
+    <p>Une nouvelle livraison vous a été assignée :</p>
+    <ul>
+        <li><strong>Client:</strong> {delivery['nom']}</li>
+        <li><strong>Téléphone:</strong> {delivery['telephone']}</li>
+        <li><strong>Enlèvement:</strong> {delivery['zone_enlevement']}</li>
+        <li><strong>Livraison:</strong> {delivery['zone_livraison']}</li>
+        <li><strong>Type:</strong> {delivery['type_colis']}</li>
+        <li><strong>Urgence:</strong> {delivery['urgence']}</li>
+    </ul>
+    <p>Veuillez contacter le client pour organiser l'enlèvement.</p>
+    <p>Cordialement,<br>L'équipe PLB Logistique</p>
+    """
+    await send_notification_email(f"🚚 Nouvelle livraison assignée", html, rider['email'])
+    
+    return {"success": True, "message": f"Livraison assignée à {rider['prenom']} {rider['nom']}"}
+
+@api_router.patch("/admin/delivery-requests/{delivery_id}/status")
+async def update_delivery_status(delivery_id: str, data: StatusUpdate, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    delivery = await db.delivery_requests.find_one({"id": delivery_id}, {"_id": 0})
+    if not delivery:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+    
+    update_data = {"status": data.status}
+    
+    # If marking as completed, update timestamps and rider stats
+    if data.status == "livre":
+        update_data["completed_at"] = datetime.now(timezone.utc).isoformat()
+        
+        if delivery.get('livreur_id'):
+            await db.riders.update_one(
+                {"id": delivery['livreur_id']},
+                {
+                    "$inc": {"total_livraisons": 1, "livraisons_en_cours": -1}
+                }
+            )
+    
+    await db.delivery_requests.update_one(
+        {"id": delivery_id},
+        {"$set": update_data}
+    )
+    
+    return {"success": True, "message": f"Statut mis à jour: {data.status}"}
+
+# ============ ANALYTICS ============
+
+@api_router.get("/admin/analytics")
+async def get_analytics(password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    # Get counts
+    total_deliveries = await db.delivery_requests.count_documents({})
+    completed_deliveries = await db.delivery_requests.count_documents({"status": "livre"})
+    pending_deliveries = await db.delivery_requests.count_documents({"status": {"$in": ["nouveau", "assigne", "en_cours"]}})
+    
+    total_merchants = await db.merchants.count_documents({})
+    active_merchants = await db.merchants.count_documents({"status": "accepte"})
+    
+    total_riders = await db.riders.count_documents({})
+    active_riders = await db.riders.count_documents({"status": "accepte"})
+    
+    # Average rating
+    feedback_list = await db.feedback.find({}, {"_id": 0, "note": 1}).to_list(1000)
+    avg_rating = sum(f['note'] for f in feedback_list) / len(feedback_list) if feedback_list else 0
+    
+    # Top riders by deliveries
+    top_riders = await db.riders.find(
+        {"status": "accepte"},
+        {"_id": 0, "id": 1, "prenom": 1, "nom": 1, "total_livraisons": 1, "livraisons_en_cours": 1}
+    ).sort("total_livraisons", -1).limit(10).to_list(10)
+    
+    # Deliveries by status
+    status_counts = {}
+    for status in ["nouveau", "assigne", "en_cours", "livre", "annule"]:
+        count = await db.delivery_requests.count_documents({"status": status})
+        status_counts[status] = count
+    
+    # Deliveries by urgency
+    urgency_counts = {}
+    for urgency in ["standard", "express", "urgent"]:
+        count = await db.delivery_requests.count_documents({"urgence": urgency})
+        urgency_counts[urgency] = count
+    
+    # Recent activity (last 7 days)
+    seven_days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    recent_deliveries = await db.delivery_requests.count_documents({
+        "created_at": {"$gte": seven_days_ago}
+    })
+    recent_completed = await db.delivery_requests.count_documents({
+        "status": "livre",
+        "completed_at": {"$gte": seven_days_ago}
+    })
+    
+    return {
+        "overview": {
+            "total_livraisons": total_deliveries,
+            "livraisons_completees": completed_deliveries,
+            "livraisons_en_attente": pending_deliveries,
+            "total_commercants": total_merchants,
+            "commercants_actifs": active_merchants,
+            "total_livreurs": total_riders,
+            "livreurs_actifs": active_riders,
+            "note_moyenne": round(avg_rating, 1)
+        },
+        "par_statut": status_counts,
+        "par_urgence": urgency_counts,
+        "top_livreurs": top_riders,
+        "activite_recente": {
+            "nouvelles_demandes_7j": recent_deliveries,
+            "livraisons_completees_7j": recent_completed
+        }
+    }
+
+# ============ STATS ============
+
+@api_router.get("/admin/stats")
+async def get_stats(password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    delivery_count = await db.delivery_requests.count_documents({})
+    feedback_count = await db.feedback.count_documents({})
+    merchant_count = await db.merchants.count_documents({})
+    rider_count = await db.riders.count_documents({})
+    
+    return {
+        "demandes_livraison": delivery_count,
+        "avis_clients": feedback_count,
+        "commercants": merchant_count,
+        "livreurs": rider_count
+    }
 
 # ============ EXPORT ENDPOINTS ============
 
@@ -397,25 +666,6 @@ async def export_riders(password: str = Query(...)):
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=livreurs.csv"}
     )
-
-# ============ STATS ============
-
-@api_router.get("/admin/stats")
-async def get_stats(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
-    delivery_count = await db.delivery_requests.count_documents({})
-    feedback_count = await db.feedback.count_documents({})
-    merchant_count = await db.merchants.count_documents({})
-    rider_count = await db.riders.count_documents({})
-    
-    return {
-        "demandes_livraison": delivery_count,
-        "avis_clients": feedback_count,
-        "commercants": merchant_count,
-        "livreurs": rider_count
-    }
 
 # Include the router in the main app
 app.include_router(api_router)
