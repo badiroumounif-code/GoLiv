@@ -390,6 +390,42 @@ async def get_me(user: dict = Depends(get_current_user)):
         "linked_id": user.get("linked_id")
     }
 
+@api_router.post("/auth/init-admin")
+async def init_admin(password: str = Query(...)):
+    """Initialize admin account - only works if no admin exists"""
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Mot de passe incorrect")
+    
+    # Check if admin exists
+    existing_admin = await db.users.find_one({"role": "admin"})
+    if existing_admin:
+        raise HTTPException(status_code=400, detail="Un compte admin existe déjà")
+    
+    # Create admin user
+    admin = User(
+        email="admin@plb.bj",
+        password_hash=hash_password(ADMIN_PASSWORD),
+        role="admin",
+        nom="Administrateur PLB",
+        telephone=""
+    )
+    
+    await db.users.insert_one(admin.model_dump())
+    
+    token = create_token(admin.id, admin.role, admin.linked_id)
+    
+    return {
+        "success": True,
+        "message": "Compte admin créé",
+        "token": token,
+        "user": {
+            "id": admin.id,
+            "email": admin.email,
+            "role": admin.role,
+            "nom": admin.nom
+        }
+    }
+
 # ============ PUBLIC ENDPOINTS ============
 
 @api_router.get("/")
