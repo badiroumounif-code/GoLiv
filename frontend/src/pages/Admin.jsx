@@ -55,6 +55,8 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const ITEMS_PER_PAGE = 10;
 
 export default function Admin() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated: jwtAuthenticated, logout: jwtLogout } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
