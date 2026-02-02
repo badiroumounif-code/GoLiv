@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 class PLBLogistiqueAPITester:
-    def __init__(self, base_url="https://cargo-connect-162.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://benin-delivery.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_password = "plb2024"
         self.tests_run = 0
