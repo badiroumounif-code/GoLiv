@@ -490,16 +490,122 @@ async def init_admin(password: str = Query(...)):
 
 @api_router.get("/")
 async def root():
-    return {"message": "PLB Logistique API", "version": "2.0"}
+    return {"message": "PLB Logistique API", "version": "3.0"}
 
 @api_router.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
+# ============ ZONES (Public read) ============
+
+@api_router.get("/zones")
+async def get_active_zones():
+    """Get all active zones for delivery form"""
+    zones = await db.zones.find({"is_active": True}, {"_id": 0}).to_list(100)
+    return zones
+
+# ============ TRACKING (Public) ============
+
+@api_router.get("/track/{tracking_number}")
+async def track_delivery(tracking_number: str):
+    """Public tracking endpoint - no auth required"""
+    delivery = await db.delivery_requests.find_one(
+        {"tracking_number": tracking_number.upper()},
+        {"_id": 0}
+    )
+    
+    if not delivery:
+        raise HTTPException(status_code=404, detail="Numéro de suivi introuvable")
+    
+    # Return only public info (no financial data)
+    status_labels = {
+        "nouveau": "En attente de prise en charge",
+        "assigne": "Assigné à un livreur",
+        "en_cours": "En cours de livraison",
+        "livre": "Livré",
+        "echec": "Échec de livraison",
+        "annule": "Annulé"
+    }
+    
+    return {
+        "tracking_number": delivery.get("tracking_number"),
+        "status": delivery.get("status"),
+        "status_label": status_labels.get(delivery.get("status"), delivery.get("status")),
+        "zone_enlevement": delivery.get("zone_enlevement"),
+        "zone_livraison": delivery.get("zone_livraison"),
+        "type_colis": delivery.get("type_colis"),
+        "created_at": delivery.get("created_at"),
+        "last_status_update": delivery.get("last_status_update") or delivery.get("created_at"),
+        "delivery_notes": delivery.get("delivery_notes") if delivery.get("status") in ["livre", "echec"] else None
+    }
+
+# ============ PRICING HELPER ============
+
+async def calculate_delivery_price(zone_id: str, poids: float = None):
+    """Calculate delivery price based on zone and weight"""
+    # Get zone
+    zone = await db.zones.find_one({"id": zone_id, "is_active": True}, {"_id": 0})
+    if not zone:
+        return None
+    
+    # Get platform settings
+    settings = await db.platform_settings.find_one({"id": "platform_settings"}, {"_id": 0})
+    if not settings:
+        settings = {
+            "poids_seuil": 5.0,
+            "poids_supplement": 500,
+            "commission_type": "percentage",
+            "commission_value": 15.0
+        }
+    
+    # Base price from zone
+    prix_zone = zone.get("prix_base", 0)
+    paiement_livreur = zone.get("paiement_livreur", 0)
+    
+    # Weight surcharge
+    supplement_poids = 0
+    if poids and poids > settings.get("poids_seuil", 5.0):
+        supplement_poids = settings.get("poids_supplement", 500)
+    
+    # Total price
+    prix_total = prix_zone + supplement_poids
+    
+    # Commission
+    if settings.get("commission_type") == "percentage":
+        commission = int(prix_total * settings.get("commission_value", 15) / 100)
+    else:
+        commission = int(settings.get("commission_value", 0))
+    
+    return {
+        "prix_zone": prix_zone,
+        "supplement_poids": supplement_poids,
+        "prix_total": prix_total,
+        "paiement_livreur": paiement_livreur,
+        "commission_plateforme": commission
+    }
+
 # Delivery Requests (Public)
-@api_router.post("/delivery-requests", response_model=DeliveryRequest)
+@api_router.post("/delivery-requests")
 async def create_delivery_request(data: DeliveryRequestCreate):
-    delivery = DeliveryRequest(**data.model_dump())
+    # Generate tracking number
+    tracking_number = await get_next_tracking_number()
+    
+    # Calculate pricing if zone_id provided
+    pricing = None
+    if data.zone_livraison_id:
+        pricing = await calculate_delivery_price(data.zone_livraison_id, data.poids)
+    
+    delivery = DeliveryRequest(
+        **data.model_dump(),
+        tracking_number=tracking_number,
+        prix_zone=pricing.get("prix_zone") if pricing else None,
+        supplement_poids=pricing.get("supplement_poids") if pricing else None,
+        prix_total=pricing.get("prix_total") if pricing else None,
+        paiement_livreur=pricing.get("paiement_livreur") if pricing else None,
+        commission_plateforme=pricing.get("commission_plateforme") if pricing else None,
+        last_status_update=datetime.now(timezone.utc).isoformat()
+    )
+    
     doc = delivery.model_dump()
     await db.delivery_requests.insert_one(doc)
     
