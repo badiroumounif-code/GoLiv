@@ -125,14 +125,24 @@ class UserLogin(BaseModel):
 
 class DeliveryRequest(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    tracking_number: Optional[str] = None  # PLB-YYYY-XXXXXX
     nom: str
     telephone: str
     zone_enlevement: str
     zone_livraison: str
+    zone_livraison_id: Optional[str] = None  # Reference to zone for pricing
     type_colis: str
     urgence: str
+    poids: Optional[float] = None  # Weight in kg
     notes: Optional[str] = None
     status: str = "nouveau"
+    # Pricing fields
+    prix_zone: Optional[int] = None  # Base price from zone
+    supplement_poids: Optional[int] = None  # Weight surcharge
+    prix_total: Optional[int] = None  # Final price
+    paiement_livreur: Optional[int] = None  # Rider payment
+    commission_plateforme: Optional[int] = None  # Platform commission
+    # Assignment fields
     livreur_id: Optional[str] = None
     livreur_nom: Optional[str] = None
     merchant_id: Optional[str] = None
@@ -142,6 +152,7 @@ class DeliveryRequest(BaseModel):
     delivery_notes: Optional[str] = None
     delivery_proof: Optional[str] = None
     rider_accepted: Optional[bool] = None
+    last_status_update: Optional[str] = None
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class DeliveryRequestCreate(BaseModel):
@@ -149,8 +160,10 @@ class DeliveryRequestCreate(BaseModel):
     telephone: str
     zone_enlevement: str
     zone_livraison: str
+    zone_livraison_id: Optional[str] = None
     type_colis: str
     urgence: str
+    poids: Optional[float] = None
     notes: Optional[str] = None
 
 class MerchantDeliveryCreate(BaseModel):
@@ -158,8 +171,10 @@ class MerchantDeliveryCreate(BaseModel):
     telephone_client: str
     zone_enlevement: str
     zone_livraison: str
+    zone_livraison_id: Optional[str] = None
     type_colis: str
     urgence: str
+    poids: Optional[float] = None
     notes: Optional[str] = None
 
 class Feedback(BaseModel):
