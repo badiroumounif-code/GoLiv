@@ -609,21 +609,34 @@ async def create_delivery_request(data: DeliveryRequestCreate):
     doc = delivery.model_dump()
     await db.delivery_requests.insert_one(doc)
     
-    # Send email notification
+    # Send email notification with tracking number
+    prix_display = f"{delivery.prix_total} FCFA" if delivery.prix_total else "À déterminer"
     html = f"""
     <h2>🚚 Nouvelle Demande de Livraison</h2>
+    <p><strong>Numéro de suivi:</strong> <span style="font-size: 18px; font-weight: bold; color: #0ea5e9;">{delivery.tracking_number}</span></p>
+    <hr>
     <p><strong>Client:</strong> {delivery.nom}</p>
     <p><strong>Téléphone:</strong> {delivery.telephone}</p>
     <p><strong>Zone d'enlèvement:</strong> {delivery.zone_enlevement}</p>
     <p><strong>Zone de livraison:</strong> {delivery.zone_livraison}</p>
     <p><strong>Type de colis:</strong> {delivery.type_colis}</p>
+    <p><strong>Poids:</strong> {delivery.poids or 'Non spécifié'} kg</p>
     <p><strong>Urgence:</strong> {delivery.urgence}</p>
+    <p><strong>Prix:</strong> {prix_display}</p>
     <p><strong>Notes:</strong> {delivery.notes or 'Aucune'}</p>
+    <hr>
     <p><em>Reçu le {delivery.created_at}</em></p>
+    <p>Suivez votre colis avec le numéro: <strong>{delivery.tracking_number}</strong></p>
     """
-    await send_notification_email(f"🚚 Nouvelle demande de {delivery.nom}", html)
+    await send_notification_email(f"🚚 Livraison {delivery.tracking_number} - {delivery.nom}", html)
     
-    return delivery
+    # Return delivery without internal financial data for public
+    response = delivery.model_dump()
+    # Remove internal fields for public response
+    for field in ["commission_plateforme", "paiement_livreur"]:
+        response.pop(field, None)
+    
+    return response
 
 # Feedback
 @api_router.post("/feedback", response_model=Feedback)
