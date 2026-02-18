@@ -56,6 +56,19 @@ logger = logging.getLogger(__name__)
 
 # ============ MODELS ============
 
+# Tracking number counter (will be stored in DB)
+async def get_next_tracking_number():
+    """Generate next tracking number in format PLB-YYYY-XXXXXX"""
+    year = datetime.now(timezone.utc).year
+    counter_doc = await db.counters.find_one_and_update(
+        {"_id": "tracking_number"},
+        {"$inc": {"seq": 1}},
+        upsert=True,
+        return_document=True
+    )
+    seq = counter_doc.get("seq", 1)
+    return f"PLB-{year}-{seq:06d}"
+
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: str
@@ -66,6 +79,38 @@ class User(BaseModel):
     telephone: Optional[str] = None
     is_active: bool = True
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+# Zone model for pricing
+class Zone(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    nom: str
+    prix_base: int  # Base price in FCFA
+    paiement_livreur: int  # Fixed rider payment in FCFA
+    is_active: bool = True
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class ZoneCreate(BaseModel):
+    nom: str
+    prix_base: int
+    paiement_livreur: int
+    is_active: bool = True
+
+class ZoneUpdate(BaseModel):
+    nom: Optional[str] = None
+    prix_base: Optional[int] = None
+    paiement_livreur: Optional[int] = None
+    is_active: Optional[bool] = None
+
+# Platform settings model
+class PlatformSettings(BaseModel):
+    id: str = "platform_settings"
+    # Weight surcharge
+    poids_seuil: float = 5.0  # kg threshold
+    poids_supplement: int = 500  # FCFA surcharge above threshold
+    # Commission
+    commission_type: str = "percentage"  # "percentage" or "fixed"
+    commission_value: float = 15.0  # percentage or FCFA amount
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class UserRegister(BaseModel):
     email: str
