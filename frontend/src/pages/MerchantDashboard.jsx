@@ -132,27 +132,46 @@ export default function MerchantDashboard() {
     setNewDelivery(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleZoneSelect = (zoneId) => {
+    const zone = availableZones.find(z => z.id === zoneId);
+    if (zone) {
+      setNewDelivery(prev => ({ 
+        ...prev, 
+        zone_livraison: zone.nom,
+        zone_livraison_id: zone.id 
+      }));
+    }
+  };
+
   const handleSubmitNewDelivery = async (e) => {
     e.preventDefault();
     setFormLoading(true);
     try {
+      const payload = {
+        ...newDelivery,
+        poids: newDelivery.poids ? parseFloat(newDelivery.poids) : null
+      };
       const res = await authFetch(`${API_URL}/api/merchant/deliveries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newDelivery)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
-        toast.success("Commande créée avec succès !");
+        const data = await res.json();
+        toast.success(`Commande créée ! N° ${data.tracking_number}`);
         setShowNewForm(false);
         setNewDelivery({
           nom_client: "",
           telephone_client: "",
           zone_enlevement: "",
           zone_livraison: "",
+          zone_livraison_id: "",
           type_colis: "petit_colis",
           urgence: "standard",
+          poids: "",
           notes: ""
         });
+        setEstimatedPrice(null);
         fetchData();
       } else {
         const data = await res.json();
