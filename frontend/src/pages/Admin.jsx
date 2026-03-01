@@ -6,7 +6,8 @@ import {
   Download, RefreshCw, Loader2, Star, Eye, Check, X, UserPlus,
   TrendingUp, BarChart3, Clock, CheckCircle, Truck, AlertCircle,
   Trash2, RotateCcw, MoreVertical, Ban, Search, Filter, Calendar,
-  ArrowUpDown, ArrowUp, ArrowDown, FileText, Phone, MapPin, ChevronLeft, ChevronRight
+  ArrowUpDown, ArrowUp, ArrowDown, FileText, Phone, MapPin, ChevronLeft, ChevronRight,
+  Settings, DollarSign, Scale, Percent, Plus, Edit2, Save
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -45,6 +46,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { Textarea } from "../components/ui/textarea";
 import { Badge } from "../components/ui/badge";
+import { Switch } from "../components/ui/switch";
 import { toast } from "sonner";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
