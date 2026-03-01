@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Truck, Package, Clock, MapPin, CheckCircle, ArrowRight, Star, Shield, Users } from "lucide-react";
+import { Truck, Package, Clock, MapPin, CheckCircle, ArrowRight, Star, Shield, Users, Search, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -18,6 +22,47 @@ const stagger = {
 };
 
 export default function Home() {
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [trackingResult, setTrackingResult] = useState(null);
+  const [trackingError, setTrackingError] = useState(null);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+
+  const handleTrackingSearch = async (e) => {
+    e.preventDefault();
+    if (!trackingNumber.trim()) return;
+    
+    setTrackingLoading(true);
+    setTrackingError(null);
+    setTrackingResult(null);
+    
+    try {
+      const response = await fetch(`${API_URL}/api/track/${trackingNumber.trim()}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setTrackingError(data.detail || "Numéro introuvable");
+      } else {
+        setTrackingResult(data);
+      }
+    } catch (error) {
+      setTrackingError("Erreur de connexion. Veuillez réessayer.");
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      nouveau: "bg-blue-100 text-blue-700 border-blue-200",
+      assigne: "bg-amber-100 text-amber-700 border-amber-200",
+      en_cours: "bg-sky-100 text-sky-700 border-sky-200",
+      livre: "bg-green-100 text-green-700 border-green-200",
+      echec: "bg-red-100 text-red-700 border-red-200",
+      annule: "bg-slate-100 text-slate-700 border-slate-200"
+    };
+    return colors[status] || "bg-slate-100 text-slate-700";
+  };
+
   const features = [
     {
       icon: <Truck className="w-6 h-6" />,
