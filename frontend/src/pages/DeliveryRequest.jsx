@@ -306,7 +306,7 @@ export default function DeliveryRequest() {
                         <SelectValue placeholder="Sélectionner une zone" />
                       </SelectTrigger>
                       <SelectContent>
-                        {zones.map((zone) => (
+                        {pickupZones.map((zone) => (
                           <SelectItem key={zone} value={zone}>
                             {zone}
                           </SelectItem>
@@ -318,6 +318,109 @@ export default function DeliveryRequest() {
                     <Label className="text-slate-700 mb-2 block">
                       Zone de livraison *
                     </Label>
+                    <Select
+                      value={formData.zone_livraison_id}
+                      onValueChange={(value) => handleSelectChange("zone_livraison", value)}
+                    >
+                      <SelectTrigger className="rounded-xl h-12" data-testid="delivery-zone-livraison-select">
+                        <SelectValue placeholder="Sélectionner une zone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {zones.map((zone) => (
+                          <SelectItem key={zone.id} value={zone.id}>
+                            {zone.nom} - {zone.prix_base.toLocaleString()} FCFA
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Package Details + Weight */}
+                <div className="grid md:grid-cols-3 gap-5">
+                  <div>
+                    <Label className="text-slate-700 mb-2 block">
+                      Type de colis *
+                    </Label>
+                    <Select
+                      value={formData.type_colis}
+                      onValueChange={(value) => handleSelectChange("type_colis", value)}
+                    >
+                      <SelectTrigger className="rounded-xl h-12" data-testid="delivery-type-colis-select">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {packageTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-slate-700 mb-2 block">
+                      Urgence *
+                    </Label>
+                    <Select
+                      value={formData.urgence}
+                      onValueChange={(value) => handleSelectChange("urgence", value)}
+                    >
+                      <SelectTrigger className="rounded-xl h-12" data-testid="delivery-urgence-select">
+                        <SelectValue placeholder="Sélectionner" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {urgencyLevels.map((level) => (
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="poids" className="text-slate-700 mb-2 block">
+                      Poids estimé (kg)
+                    </Label>
+                    <div className="relative">
+                      <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <Input
+                        id="poids"
+                        name="poids"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value={formData.poids}
+                        onChange={handleChange}
+                        placeholder="Ex: 2.5"
+                        className="rounded-xl h-12 pl-10"
+                        data-testid="delivery-poids-input"
+                      />
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">+500 FCFA si &gt; 5kg</p>
+                  </div>
+                </div>
+
+                {/* Estimated Price Display */}
+                {estimatedPrice && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between"
+                    data-testid="estimated-price-display"
+                  >
+                    <div>
+                      <p className="text-sm text-green-600">Prix estimé de la livraison</p>
+                      <p className="text-xs text-green-500">
+                        {formData.poids && parseFloat(formData.poids) > 5 
+                          ? `Zone: ${estimatedPrice - 500} FCFA + Supplément poids: 500 FCFA`
+                          : `Zone: ${estimatedPrice} FCFA`
+                        }
+                      </p>
+                    </div>
+                    <p className="text-2xl font-bold text-green-700">{estimatedPrice.toLocaleString()} FCFA</p>
+                  </motion.div>
+                )}
                     <Select
                       value={formData.zone_livraison}
                       onValueChange={(value) => handleSelectChange("zone_livraison", value)}
