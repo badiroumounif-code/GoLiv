@@ -109,6 +109,17 @@ export default function Admin() {
   const [selectedRiderId, setSelectedRiderId] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   
+  // Settings & Financial states
+  const [zones, setZones] = useState([]);
+  const [platformSettings, setPlatformSettings] = useState(null);
+  const [financialStats, setFinancialStats] = useState(null);
+  const [editingZone, setEditingZone] = useState(null);
+  const [newZone, setNewZone] = useState({ nom: "", prix_base: "", paiement_livreur: "" });
+  const [showNewZoneForm, setShowNewZoneForm] = useState(false);
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [financialDateFrom, setFinancialDateFrom] = useState("");
+  const [financialDateTo, setFinancialDateTo] = useState("");
+  
   const storedPassword = localStorage.getItem("plb_admin_password");
 
   // Check if logged in via JWT as admin
