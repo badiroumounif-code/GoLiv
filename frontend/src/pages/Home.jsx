@@ -195,6 +195,108 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Tracking Section */}
+      <section className="py-12 bg-gradient-to-br from-sky-500 to-sky-600" data-testid="tracking-section">
+        <div className="container-custom">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+              Suivez votre colis
+            </h2>
+            <p className="text-sky-100 mb-6">
+              Entrez votre numéro de suivi pour connaître l'état de votre livraison
+            </p>
+            
+            <form onSubmit={handleTrackingSearch} className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Input
+                  type="text"
+                  value={trackingNumber}
+                  onChange={(e) => setTrackingNumber(e.target.value.toUpperCase())}
+                  placeholder="PLB-2026-000001"
+                  className="pl-12 h-14 text-lg rounded-xl bg-white border-0"
+                  data-testid="tracking-input"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="h-14 px-8 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-lg"
+                disabled={trackingLoading}
+                data-testid="tracking-submit-btn"
+              >
+                {trackingLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  "Rechercher"
+                )}
+              </Button>
+            </form>
+            
+            {/* Tracking Result */}
+            {trackingError && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 bg-white/10 backdrop-blur rounded-xl p-4 text-left max-w-xl mx-auto"
+                data-testid="tracking-error"
+              >
+                <div className="flex items-center gap-3 text-white">
+                  <AlertCircle className="w-5 h-5" />
+                  <span>{trackingError}</span>
+                </div>
+              </motion.div>
+            )}
+            
+            {trackingResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 bg-white rounded-xl p-6 text-left max-w-xl mx-auto shadow-lg"
+                data-testid="tracking-result"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="text-sm text-slate-500">Numéro de suivi</p>
+                    <p className="text-xl font-bold text-slate-900">{trackingResult.tracking_number}</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(trackingResult.status)}`}>
+                    {trackingResult.status_label}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="text-xs text-slate-500 mb-1">Enlèvement</p>
+                    <p className="font-medium text-slate-900 flex items-center gap-1">
+                      <MapPin className="w-4 h-4 text-sky-500" />
+                      {trackingResult.zone_enlevement}
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <p className="text-xs text-slate-500 mb-1">Livraison</p>
+                    <p className="font-medium text-slate-900 flex items-center gap-1">
+                      <MapPin className="w-4 h-4 text-green-500" />
+                      {trackingResult.zone_livraison}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between text-sm text-slate-500 pt-3 border-t">
+                  <span>Créé le {new Date(trackingResult.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</span>
+                  <span>Mis à jour: {new Date(trackingResult.last_status_update).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+                
+                {trackingResult.delivery_notes && (
+                  <div className="mt-3 p-3 bg-amber-50 rounded-lg text-sm text-amber-800">
+                    <strong>Note:</strong> {trackingResult.delivery_notes}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section className="py-16 bg-slate-50">
         <div className="container-custom">
