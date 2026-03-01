@@ -708,10 +708,6 @@ export default function MerchantDashboard() {
                   <span className="text-lg font-bold text-green-700">{estimatedPrice.toLocaleString()} FCFA</span>
                 </div>
               )}
-                    ))}
-                  </select>
-                </div>
-              </div>
 
               <div>
                 <Label htmlFor="notes">Notes (optionnel)</Label>
