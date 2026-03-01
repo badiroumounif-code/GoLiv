@@ -185,14 +185,17 @@ export default function Admin() {
     setLoading(true);
     const pwd = localStorage.getItem("plb_admin_password");
     try {
-      const [statsRes, analyticsRes, deliveryRes, feedbackRes, merchantsRes, ridersRes, contactsRes] = await Promise.all([
+      const [statsRes, analyticsRes, deliveryRes, feedbackRes, merchantsRes, ridersRes, contactsRes, zonesRes, settingsRes, financialRes] = await Promise.all([
         axios.get(`${API}/admin/stats?password=${pwd}`),
         axios.get(`${API}/admin/analytics?password=${pwd}`),
         axios.get(`${API}/admin/delivery-requests?password=${pwd}`),
         axios.get(`${API}/admin/feedback?password=${pwd}`),
         axios.get(`${API}/admin/merchants?password=${pwd}`),
         axios.get(`${API}/admin/riders?password=${pwd}`),
-        axios.get(`${API}/admin/contacts?password=${pwd}`)
+        axios.get(`${API}/admin/contacts?password=${pwd}`),
+        axios.get(`${API}/admin/zones?password=${pwd}`).catch(() => ({ data: [] })),
+        axios.get(`${API}/admin/settings?password=${pwd}`).catch(() => ({ data: null })),
+        axios.get(`${API}/admin/financial?password=${pwd}`).catch(() => ({ data: null }))
       ]);
       
       setStats(statsRes.data);
@@ -202,6 +205,9 @@ export default function Admin() {
       setMerchants(merchantsRes.data);
       setRiders(ridersRes.data);
       setContacts(contactsRes.data);
+      setZones(zonesRes.data || []);
+      setPlatformSettings(settingsRes.data);
+      setFinancialStats(financialRes.data);
     } catch (error) {
       console.error(error);
       if (error.response?.status === 401) {
