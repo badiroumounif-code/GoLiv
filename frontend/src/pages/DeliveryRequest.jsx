@@ -421,67 +421,6 @@ export default function DeliveryRequest() {
                     <p className="text-2xl font-bold text-green-700">{estimatedPrice.toLocaleString()} FCFA</p>
                   </motion.div>
                 )}
-                    <Select
-                      value={formData.zone_livraison}
-                      onValueChange={(value) => handleSelectChange("zone_livraison", value)}
-                    >
-                      <SelectTrigger className="rounded-xl h-12" data-testid="delivery-zone-livraison-select">
-                        <SelectValue placeholder="Sélectionner une zone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {zones.map((zone) => (
-                          <SelectItem key={zone} value={zone}>
-                            {zone}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Package & Urgency */}
-                <div className="grid md:grid-cols-2 gap-5">
-                  <div>
-                    <Label className="text-slate-700 mb-2 block">
-                      Type de colis *
-                    </Label>
-                    <Select
-                      value={formData.type_colis}
-                      onValueChange={(value) => handleSelectChange("type_colis", value)}
-                    >
-                      <SelectTrigger className="rounded-xl h-12" data-testid="delivery-type-colis-select">
-                        <SelectValue placeholder="Sélectionner un type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {packageTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-slate-700 mb-2 block">
-                      Niveau d&apos;urgence *
-                    </Label>
-                    <Select
-                      value={formData.urgence}
-                      onValueChange={(value) => handleSelectChange("urgence", value)}
-                    >
-                      <SelectTrigger className="rounded-xl h-12" data-testid="delivery-urgence-select">
-                        <SelectValue placeholder="Sélectionner un niveau" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {urgencyLevels.map((level) => (
-                          <SelectItem key={level.value} value={level.value}>
-                            {level.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
 
                 {/* Notes */}
                 <div>
