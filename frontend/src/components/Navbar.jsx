@@ -48,6 +48,7 @@ export default function Navbar() {
     { name: "Accueil", path: "/" },
     { name: "Comment ça marche", path: "/comment-ca-marche" },
     { name: "Services & Tarifs", path: "/services" },
+    { name: "FAQ", path: "/faq" },
     { name: "À propos", path: "/a-propos" },
     { name: "Contact", path: "/contact" },
   ];
