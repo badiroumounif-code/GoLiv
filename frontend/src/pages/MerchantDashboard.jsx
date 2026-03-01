@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { 
   Package, CheckCircle, Clock, XCircle, MapPin, 
   Phone, User, AlertCircle, RefreshCw, LogOut, TrendingUp,
-  Plus, Download, Search, Building2, MessageSquare
+  Plus, Download, Search, Building2, MessageSquare, Scale
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -26,17 +26,21 @@ export default function MerchantDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showNewForm, setShowNewForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [availableZones, setAvailableZones] = useState([]);
+  const [estimatedPrice, setEstimatedPrice] = useState(null);
   const [newDelivery, setNewDelivery] = useState({
     nom_client: "",
     telephone_client: "",
     zone_enlevement: "",
     zone_livraison: "",
+    zone_livraison_id: "",
     type_colis: "petit_colis",
     urgence: "standard",
+    poids: "",
     notes: ""
   });
 
-  const zones = ["Cotonou Centre", "Akpakpa", "Calavi", "Godomey", "Porto-Novo", "Fidjrossè", "Cadjèhoun", "Ganhi", "Dantokpa"];
+  const pickupZones = ["Cotonou Centre", "Akpakpa", "Calavi", "Godomey", "Porto-Novo", "Fidjrossè", "Cadjèhoun", "Ganhi", "Dantokpa"];
   const typesColis = [
     { value: "petit_colis", label: "Petit colis (< 5kg)" },
     { value: "moyen_colis", label: "Moyen colis (5-15kg)" },
