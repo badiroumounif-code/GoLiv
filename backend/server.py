@@ -1585,6 +1585,199 @@ async def export_riders(password: str = Query(...)):
         headers={"Content-Disposition": "attachment; filename=livreurs.csv"}
     )
 
+# ============ ADMIN ZONES MANAGEMENT ============
+
+@api_router.get("/admin/zones")
+async def get_all_zones(password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    zones = await db.zones.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return zones
+
+@api_router.post("/admin/zones")
+async def create_zone(data: ZoneCreate, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    zone = Zone(**data.model_dump())
+    await db.zones.insert_one(zone.model_dump())
+    return zone
+
+@api_router.patch("/admin/zones/{zone_id}")
+async def update_zone(zone_id: str, data: ZoneUpdate, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+    
+    result = await db.zones.update_one({"id": zone_id}, {"$set": update_data})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Zone non trouvée")
+    
+    return {"success": True, "message": "Zone mise à jour"}
+
+@api_router.delete("/admin/zones/{zone_id}")
+async def delete_zone(zone_id: str, password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    result = await db.zones.delete_one({"id": zone_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Zone non trouvée")
+    
+    return {"success": True, "message": "Zone supprimée"}
+
+# ============ ADMIN PLATFORM SETTINGS ============
+
+@api_router.get("/admin/settings")
+async def get_platform_settings(password: str = Query(...)):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    settings = await db.platform_settings.find_one({"id": "platform_settings"}, {"_id": 0})
+    if not settings:
+        # Return default settings
+        settings = {
+            "id": "platform_settings",
+            "poids_seuil": 5.0,
+            "poids_supplement": 500,
+            "commission_type": "percentage",
+            "commission_value": 15.0
+        }
+    return settings
+
+@api_router.put("/admin/settings")
+async def update_platform_settings(
+    password: str = Query(...),
+    poids_seuil: float = Query(None),
+    poids_supplement: int = Query(None),
+    commission_type: str = Query(None),
+    commission_value: float = Query(None)
+):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    if poids_seuil is not None:
+        update_data["poids_seuil"] = poids_seuil
+    if poids_supplement is not None:
+        update_data["poids_supplement"] = poids_supplement
+    if commission_type is not None:
+        update_data["commission_type"] = commission_type
+    if commission_value is not None:
+        update_data["commission_value"] = commission_value
+    
+    await db.platform_settings.update_one(
+        {"id": "platform_settings"},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    return {"success": True, "message": "Paramètres mis à jour"}
+
+# ============ ADMIN FINANCIAL DASHBOARD ============
+
+@api_router.get("/admin/financial")
+async def get_financial_stats(
+    password: str = Query(...),
+    date_from: str = Query(None),
+    date_to: str = Query(None)
+):
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    # Build date filter
+    date_filter = {}
+    if date_from:
+        date_filter["$gte"] = date_from
+    if date_to:
+        date_filter["$lte"] = date_to
+    
+    query = {}
+    if date_filter:
+        query["created_at"] = date_filter
+    
+    # Get all deliveries with pricing
+    deliveries = await db.delivery_requests.find(
+        {**query, "prix_total": {"$ne": None}},
+        {"_id": 0}
+    ).to_list(10000)
+    
+    # Calculate totals
+    total_revenue = sum(d.get("prix_total", 0) or 0 for d in deliveries)
+    total_rider_payments = sum(d.get("paiement_livreur", 0) or 0 for d in deliveries)
+    total_commission = sum(d.get("commission_plateforme", 0) or 0 for d in deliveries)
+    
+    # Count by status
+    delivered = [d for d in deliveries if d.get("status") == "livre"]
+    pending = [d for d in deliveries if d.get("status") in ["nouveau", "assigne", "en_cours"]]
+    
+    delivered_revenue = sum(d.get("prix_total", 0) or 0 for d in delivered)
+    pending_revenue = sum(d.get("prix_total", 0) or 0 for d in pending)
+    
+    return {
+        "totaux": {
+            "chiffre_affaires": total_revenue,
+            "paiements_livreurs": total_rider_payments,
+            "commission_plateforme": total_commission,
+            "marge_nette": total_revenue - total_rider_payments
+        },
+        "par_statut": {
+            "livrees": {
+                "count": len(delivered),
+                "montant": delivered_revenue
+            },
+            "en_cours": {
+                "count": len(pending),
+                "montant": pending_revenue
+            }
+        },
+        "nombre_livraisons": len(deliveries)
+    }
+
+# ============ INIT DEFAULT ZONES ============
+
+@api_router.post("/admin/init-zones")
+async def init_default_zones(password: str = Query(...)):
+    """Initialize default zones - only if no zones exist"""
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    
+    existing = await db.zones.count_documents({})
+    if existing > 0:
+        raise HTTPException(status_code=400, detail="Des zones existent déjà")
+    
+    default_zones = [
+        Zone(nom="Cotonou Centre", prix_base=1500, paiement_livreur=1000, is_active=True),
+        Zone(nom="Akpakpa", prix_base=2000, paiement_livreur=1300, is_active=True),
+        Zone(nom="Calavi", prix_base=2500, paiement_livreur=1700, is_active=True),
+        Zone(nom="Godomey", prix_base=2500, paiement_livreur=1700, is_active=True),
+        Zone(nom="Porto-Novo", prix_base=3500, paiement_livreur=2500, is_active=True),
+        Zone(nom="Périphérie", prix_base=3000, paiement_livreur=2000, is_active=True),
+        Zone(nom="Hors Zone", prix_base=5000, paiement_livreur=3500, is_active=True),
+    ]
+    
+    for zone in default_zones:
+        await db.zones.insert_one(zone.model_dump())
+    
+    # Init default platform settings
+    await db.platform_settings.update_one(
+        {"id": "platform_settings"},
+        {"$set": {
+            "id": "platform_settings",
+            "poids_seuil": 5.0,
+            "poids_supplement": 500,
+            "commission_type": "percentage",
+            "commission_value": 15.0,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True
+    )
+    
+    return {"success": True, "message": f"{len(default_zones)} zones créées"}
+
 # Include the router in the main app
 app.include_router(api_router)
 
