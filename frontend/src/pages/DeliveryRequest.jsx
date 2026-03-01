@@ -158,19 +158,51 @@ export default function DeliveryRequest() {
           <h1 className="font-heading text-3xl font-bold text-slate-900 mb-4">
             Demande envoyée !
           </h1>
+          
+          {/* Tracking Number Display */}
+          {trackingNumber && (
+            <div className="bg-sky-50 border border-sky-200 rounded-2xl p-6 mb-6">
+              <p className="text-sm text-sky-600 mb-2">Votre numéro de suivi</p>
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-2xl font-bold text-sky-700">{trackingNumber}</span>
+                <button 
+                  onClick={copyTrackingNumber}
+                  className="p-2 hover:bg-sky-100 rounded-lg transition-colors"
+                  title="Copier"
+                >
+                  <Copy className="w-5 h-5 text-sky-600" />
+                </button>
+              </div>
+              <p className="text-xs text-sky-500 mt-2">
+                Conservez ce numéro pour suivre votre livraison
+              </p>
+            </div>
+          )}
+          
+          {estimatedPrice && (
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+              <p className="text-sm text-green-600">Prix estimé</p>
+              <p className="text-2xl font-bold text-green-700">{estimatedPrice.toLocaleString()} FCFA</p>
+            </div>
+          )}
+          
           <p className="text-slate-600 mb-6">
-            Merci pour votre demande. Notre équipe vous contactera très rapidement pour confirmer les détails et le tarif de votre livraison.
+            Merci pour votre demande. Notre équipe vous contactera très rapidement pour confirmer les détails de votre livraison.
           </p>
           <Button
             onClick={() => {
               setSuccess(false);
+              setTrackingNumber(null);
+              setEstimatedPrice(null);
               setFormData({
                 nom: "",
                 telephone: "",
                 zone_enlevement: "",
                 zone_livraison: "",
+                zone_livraison_id: "",
                 type_colis: "",
                 urgence: "",
+                poids: "",
                 notes: ""
               });
             }}
