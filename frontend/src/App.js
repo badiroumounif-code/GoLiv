@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import LoginPage from "./pages/LoginPage";
 import RiderDashboard from "./pages/RiderDashboard";
 import MerchantDashboard from "./pages/MerchantDashboard";
+import FAQ from "./pages/FAQ";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <Route path="services" element={<Services />} />
               <Route path="a-propos" element={<About />} />
               <Route path="contact" element={<Contact />} />
+              <Route path="faq" element={<FAQ />} />
               <Route path="demande-livraison" element={<DeliveryRequest />} />
               <Route path="donner-avis" element={<Feedback />} />
               <Route path="devenir-partenaire/commercant" element={<PartnerMerchant />} />
