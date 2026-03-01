@@ -401,6 +401,10 @@ export default function MerchantDashboard() {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <div>
+                        {/* Tracking Number */}
+                        {delivery.tracking_number && (
+                          <p className="text-xs font-mono text-sky-600 mb-1">{delivery.tracking_number}</p>
+                        )}
                         <div className="flex items-center gap-2 mb-1">
                           <User className="w-4 h-4 text-slate-400" />
                           <span className="font-semibold text-slate-900">{delivery.nom}</span>
@@ -413,13 +417,20 @@ export default function MerchantDashboard() {
                           {delivery.telephone}
                         </div>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        delivery.urgence === "urgent" ? "bg-red-100 text-red-700" :
-                        delivery.urgence === "express" ? "bg-amber-100 text-amber-700" :
-                        "bg-slate-100 text-slate-600"
-                      }`}>
-                        {delivery.urgence}
-                      </span>
+                      <div className="text-right">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          delivery.urgence === "urgent" ? "bg-red-100 text-red-700" :
+                          delivery.urgence === "express" ? "bg-amber-100 text-amber-700" :
+                          "bg-slate-100 text-slate-600"
+                        }`}>
+                          {delivery.urgence}
+                        </span>
+                        {delivery.prix_total && (
+                          <p className="text-sm font-semibold text-green-600 mt-1">
+                            {delivery.prix_total.toLocaleString()} FCFA
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-3 mb-4">
