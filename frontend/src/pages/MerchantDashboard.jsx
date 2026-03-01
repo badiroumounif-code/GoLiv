@@ -54,6 +54,38 @@ export default function MerchantDashboard() {
     { value: "urgent", label: "Urgent (2-4h)" }
   ];
 
+  // Fetch available zones
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/zones`);
+        if (response.ok) {
+          setAvailableZones(await response.json());
+        }
+      } catch (error) {
+        console.error("Failed to fetch zones:", error);
+      }
+    };
+    fetchZones();
+  }, []);
+
+  // Calculate estimated price
+  useEffect(() => {
+    if (newDelivery.zone_livraison_id) {
+      const zone = availableZones.find(z => z.id === newDelivery.zone_livraison_id);
+      if (zone) {
+        let price = zone.prix_base;
+        const weight = parseFloat(newDelivery.poids) || 0;
+        if (weight > 5) {
+          price += 500;
+        }
+        setEstimatedPrice(price);
+      }
+    } else {
+      setEstimatedPrice(null);
+    }
+  }, [newDelivery.zone_livraison_id, newDelivery.poids, availableZones]);
+
   const fetchData = useCallback(async () => {
     try {
       const [deliveriesRes, statsRes, profileRes] = await Promise.all([
