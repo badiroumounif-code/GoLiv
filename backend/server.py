@@ -1372,7 +1372,10 @@ async def update_delivery_status(delivery_id: str, data: StatusUpdate, password:
     
     old_status = delivery.get('status')
     new_status = data.status
-    update_data = {"status": new_status}
+    update_data = {
+        "status": new_status,
+        "last_status_update": datetime.now(timezone.utc).isoformat()
+    }
     
     if delivery.get('livreur_id'):
         rider_id = delivery['livreur_id']
