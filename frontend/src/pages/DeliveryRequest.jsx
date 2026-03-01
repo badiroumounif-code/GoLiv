@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Package, Truck, CheckCircle, Loader2 } from "lucide-react";
+import { Package, Truck, CheckCircle, Loader2, Scale, Copy } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
@@ -20,17 +20,36 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 export default function DeliveryRequest() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState(null);
+  const [zones, setZones] = useState([]);
+  const [estimatedPrice, setEstimatedPrice] = useState(null);
   const [formData, setFormData] = useState({
     nom: "",
     telephone: "",
     zone_enlevement: "",
     zone_livraison: "",
+    zone_livraison_id: "",
     type_colis: "",
     urgence: "",
+    poids: "",
     notes: ""
   });
 
-  const zones = [
+  // Fetch zones on mount
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const response = await axios.get(`${API}/zones`);
+        setZones(response.data);
+      } catch (error) {
+        console.error("Failed to fetch zones:", error);
+      }
+    };
+    fetchZones();
+  }, []);
+
+  // Static zones for pickup (keep original list)
+  const pickupZones = [
     "Cotonou - Centre",
     "Cotonou - Akpakpa",
     "Cotonou - Fidjrossè",
@@ -56,12 +75,46 @@ export default function DeliveryRequest() {
     { value: "urgent", label: "Urgent (2 - 4h)" }
   ];
 
+  // Calculate estimated price when zone or weight changes
+  useEffect(() => {
+    if (formData.zone_livraison_id) {
+      const zone = zones.find(z => z.id === formData.zone_livraison_id);
+      if (zone) {
+        let price = zone.prix_base;
+        const weight = parseFloat(formData.poids) || 0;
+        if (weight > 5) {
+          price += 500; // Weight surcharge
+        }
+        setEstimatedPrice(price);
+      }
+    } else {
+      setEstimatedPrice(null);
+    }
+  }, [formData.zone_livraison_id, formData.poids, zones]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSelectChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
+    if (name === "zone_livraison") {
+      // Find zone by ID and set both name and ID
+      const zone = zones.find(z => z.id === value);
+      if (zone) {
+        setFormData({ 
+          ...formData, 
+          zone_livraison: zone.nom,
+          zone_livraison_id: zone.id 
+        });
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const copyTrackingNumber = () => {
+    navigator.clipboard.writeText(trackingNumber);
+    toast.success("Numéro de suivi copié !");
   };
 
   const handleSubmit = async (e) => {
@@ -75,7 +128,12 @@ export default function DeliveryRequest() {
 
     setLoading(true);
     try {
-      await axios.post(`${API}/delivery-requests`, formData);
+      const payload = {
+        ...formData,
+        poids: formData.poids ? parseFloat(formData.poids) : null
+      };
+      const response = await axios.post(`${API}/delivery-requests`, payload);
+      setTrackingNumber(response.data.tracking_number);
       setSuccess(true);
       toast.success("Demande envoyée avec succès !");
     } catch (error) {
