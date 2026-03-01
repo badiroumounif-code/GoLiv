@@ -1,178 +1,148 @@
 # PLB Logistique - Product Requirements Document
 
 ## Original Problem Statement
-Build a fully functional, interactive logistics website for PLB Logistique, operating in Benin (Cotonou, Porto-Novo, Calavi). The objective is creating a realistic, near-final product to observe real usage and gather insights before working with a full-time developer.
+Build a fully functional, interactive logistics website for PLB Logistique, operating in Benin (Cotonou, Porto-Novo, Calavi). Multi-phase development including public forms, admin dashboard, multi-user authentication, and advanced pricing/tracking system.
 
 ## User Personas
-1. **Clients (Particuliers/Entreprises)** - Need to request deliveries across Benin
-2. **Potential Merchant Partners** - Businesses looking to partner for regular deliveries
-3. **Potential Rider Partners** - Individuals looking to become delivery riders
-4. **Admin/Operations Team** - Need to view and manage all submissions
-5. **Approved Merchants** - Logged-in merchants managing their deliveries
-6. **Approved Riders** - Logged-in riders accepting and completing deliveries
-
-## Core Requirements (Static)
-- French language only
-- Light/soft color palette (sky blue, light grey, white)
-- Mobile-first, responsive design
-- JWT-based authentication for multi-user roles
-- Email notifications for new requests (Resend integration)
-- CSV export capability for all data
+1. **Clients** - Need to request deliveries and track packages
+2. **Merchants** - Business partners managing regular deliveries
+3. **Riders** - Delivery personnel managing assigned tasks
+4. **Admin** - Platform managers overseeing operations and finances
 
 ---
 
 ## What's Been Implemented
 
-### Phase 1 - Initial MVP (Completed)
+### Phase 1 - Core Website ✅
+- Public pages: Home, How it Works, Services & Pricing, About, Contact, FAQ
+- Forms: Delivery Request, Feedback, Partner Applications
+- Email notifications via Resend
 
-**Pages Built:**
-- ✅ Home page with hero section, features, stats, testimonials
-- ✅ How it Works (Comment ça marche) - 4-step process
-- ✅ Services & Pricing - Package types, urgency levels, pricing table
-- ✅ About (À propos) - Company story, values, team, coverage
-- ✅ Contact - Contact form + contact info
+### Phase 2 - Admin Dashboard ✅
+- Statistics and analytics with charts
+- Data management for deliveries, merchants, riders
+- CSV export functionality
+- Status management and assignment
 
-**Forms Implemented:**
-- ✅ Delivery Request Form (nom, téléphone, zones, type colis, urgence, notes)
-- ✅ Feedback Form (rating stars, commentaire, problèmes)
-- ✅ Merchant Partner Application Form
-- ✅ Rider Partner Application Form
-- ✅ Contact Form
+### Phase 3 - Multi-User Authentication ✅
+- JWT-based authentication
+- Three roles: Admin, Rider, Merchant
+- Dedicated dashboards for each role
+- Login/Register system
 
-### Phase 2 - Admin Dashboard (Completed)
+### Phase 4 - Tracking & Pricing System ✅ (December 2025)
 
-- ✅ Password-protected admin login
-- ✅ Statistics overview with charts
-- ✅ Tabbed view for all data types
-- ✅ CSV export for each category
-- ✅ Delivery assignment to riders
-- ✅ Status management (accept/refuse merchants & riders)
-- ✅ Delivery status tracking (nouveau, assigné, en_cours, livré, annulé)
-- ✅ Delete functionality for merchants/riders/deliveries
-- ✅ Advanced filters (date, status, zone, rider, urgency)
-- ✅ Search functionality
+**Tracking System:**
+- Automatic tracking number generation: `PLB-YYYY-XXXXXX`
+- Public tracking on homepage (no separate page needed)
+- Real-time status updates
+- Tracking number sent via email
 
-### Phase 3 - Multi-User Authentication (Completed December 2025)
+**Zone-Based Pricing:**
+- Configurable zones with base prices and rider payments
+- Default zones: Cotonou Centre (1,500 FCFA), Akpakpa (2,000 FCFA), Calavi/Godomey (2,500 FCFA), Périphérie (3,000 FCFA), Porto-Novo (3,500 FCFA), Hors Zone (5,000 FCFA)
+- Admin can add/edit/delete zones
 
-**Authentication System:**
-- ✅ JWT-based authentication with role-based access
-- ✅ Three user roles: Admin, Rider (Livreur), Merchant (Commerçant)
-- ✅ Login page at `/connexion` with registration option
-- ✅ Automatic user account creation when admin accepts applications
-- ✅ Auto-generated passwords sent via email upon approval
+**Weight Surcharge:**
+- Threshold: 5 kg
+- Surcharge: +500 FCFA for packages > 5kg
+- Configurable in admin settings
 
-**User Dashboards:**
-- ✅ Admin Dashboard (`/admin`) - Full platform management
-- ✅ Rider Dashboard (`/espace-livreur`) - View assigned deliveries, accept/refuse, update status
-- ✅ Merchant Dashboard (`/espace-commercant`) - View orders, create new deliveries, export data
+**Commission & Margins:**
+- Platform commission: 15% (configurable)
+- Per-delivery tracking: Customer price, Rider payment, Platform commission
+- Financial dashboard with totals and date filters
 
-**Navbar Integration:**
-- ✅ "Connexion" button when logged out
-- ✅ User menu with role label when logged in
-- ✅ "Mon espace" link to appropriate dashboard
-- ✅ Logout functionality
+**Admin Settings Page:**
+- Zones management (CRUD)
+- Weight surcharge configuration
+- Commission settings (percentage or fixed)
 
----
+**Financial Dashboard:**
+- Total revenue (Chiffre d'affaires)
+- Rider payments total
+- Platform commission total
+- Net margin calculation
+- Filter by date range
+- Breakdown by status (Delivered, In Progress)
 
-## Backend API Endpoints
-
-### Public Endpoints
-- `POST /api/delivery-requests` - Create delivery request
-- `POST /api/feedback` - Submit feedback
-- `POST /api/merchants` - Apply as merchant partner
-- `POST /api/riders` - Apply as rider partner
-- `POST /api/contact` - Send contact message
-
-### Authentication Endpoints
-- `POST /api/auth/login` - User login (all roles)
-- `POST /api/auth/register` - Register new user (rider/merchant only)
-- `GET /api/auth/me` - Get current user profile
-- `POST /api/auth/init-admin` - Initialize admin account (one-time)
-
-### Rider Endpoints (Protected)
-- `GET /api/rider/deliveries` - Get assigned deliveries
-- `GET /api/rider/stats` - Get rider statistics
-- `GET /api/rider/profile` - Get rider profile
-- `PATCH /api/rider/deliveries/{id}/accept` - Accept delivery
-- `PATCH /api/rider/deliveries/{id}/refuse` - Refuse delivery
-- `PATCH /api/rider/deliveries/{id}/status` - Update delivery status
-
-### Merchant Endpoints (Protected)
-- `GET /api/merchant/deliveries` - Get merchant's orders
-- `POST /api/merchant/deliveries` - Create new delivery
-- `GET /api/merchant/stats` - Get merchant statistics
-- `GET /api/merchant/profile` - Get merchant profile
-- `GET /api/merchant/export` - Export deliveries as CSV
-
-### Admin Endpoints (Protected)
-- All `/api/admin/*` endpoints for data management
+### Phase 5 - FAQ Redesign ✅
+- New FAQ page at `/faq`
+- Categories: Suivi de Colis, Tarification, Livraison, Poids et Colis, Contact et Support
+- Search functionality
+- Accordion-style questions
+- Contact CTA section
 
 ---
 
 ## Technical Architecture
 
-**Frontend:** React + Tailwind CSS + Shadcn UI + Framer Motion
-**Backend:** FastAPI (Python) with Motor (async MongoDB)
-**Database:** MongoDB
-**Authentication:** JWT tokens with bcrypt password hashing
-**Email:** Resend API
+**Stack:**
+- Frontend: React + Tailwind CSS + Shadcn UI + Framer Motion
+- Backend: FastAPI (Python) + Motor (async MongoDB)
+- Database: MongoDB
+- Email: Resend API
 
 **Key Files:**
-- `/app/backend/server.py` - Main API with all endpoints
+- `/app/backend/server.py` - All API endpoints
 - `/app/frontend/src/App.js` - React routes
-- `/app/frontend/src/context/AuthContext.jsx` - Authentication context
-- `/app/frontend/src/pages/LoginPage.jsx` - Login/Register page
-- `/app/frontend/src/pages/RiderDashboard.jsx` - Rider dashboard
-- `/app/frontend/src/pages/MerchantDashboard.jsx` - Merchant dashboard
-- `/app/frontend/src/pages/Admin.jsx` - Admin dashboard
-- `/app/frontend/src/components/Navbar.jsx` - Navigation with auth
+- `/app/frontend/src/context/AuthContext.jsx` - Authentication
+- `/app/frontend/src/pages/` - All page components
+
+---
+
+## API Endpoints
+
+### Public
+- `GET /api/zones` - Active zones with pricing
+- `GET /api/track/{tracking_number}` - Track delivery
+- `POST /api/delivery-requests` - Create delivery
+
+### Authentication
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `GET /api/auth/me`
+
+### Admin
+- `GET/POST/PATCH/DELETE /api/admin/zones` - Zone management
+- `GET/PUT /api/admin/settings` - Platform settings
+- `GET /api/admin/financial` - Financial stats
+
+### Rider & Merchant
+- Role-specific CRUD operations
 
 ---
 
 ## Credentials
 
-**Admin Login:**
-- Email: `admin@plb.bj`
-- Password: `plb2024`
-
-**Test Flow:**
-1. Apply as merchant/rider via public forms
-2. Admin approves application → user account auto-created
-3. User receives credentials via email
-4. User logs in to access their dashboard
+**Admin:** admin@plb.bj / plb2024
 
 ---
 
 ## Prioritized Backlog
 
-### P0 - Critical
-- [x] Multi-user authentication system
-- [x] Rider dashboard
-- [x] Merchant dashboard
-- [ ] Configure Resend API key for production emails
+### P0 - Completed ✅
+- [x] Tracking system
+- [x] Zone-based pricing
+- [x] Weight surcharge
+- [x] Financial dashboard
+- [x] FAQ redesign
 
-### P1 - High Priority
-- [ ] Real-time delivery tracking with GPS
-- [ ] Push notifications for delivery updates
-- [ ] WhatsApp integration for customer communication
+### P1 - Next Priority
+- [ ] Configure Resend for production emails (domain verification needed)
+- [ ] Real-time notifications (WebSocket)
 - [ ] Proof of delivery (photo upload)
 
-### P2 - Medium Priority
-- [ ] Customer accounts for tracking orders
-- [ ] Advanced analytics with charts
-- [ ] Payment integration (Mobile Money, Stripe)
-- [ ] SMS notifications (Twilio)
-
-### P3 - Nice to Have
-- [ ] Mobile app (React Native)
-- [ ] Multi-language support
-- [ ] Automated pricing calculator
-- [ ] Route optimization for riders
+### P2 - Future
+- [ ] GPS tracking integration
+- [ ] Mobile app
+- [ ] Payment integration (Mobile Money)
+- [ ] SMS notifications
 
 ---
 
-## Next Tasks
-1. Test the complete flow: register → admin approval → login → dashboard
-2. Configure Resend API for production email delivery
-3. Add proof of delivery photo upload for riders
-4. Implement real-time notifications
+## Testing
+
+- Backend: 100% (19/19 tests passed)
+- Frontend: 100%
+- Test files: `/app/backend/tests/test_tracking_zones_financial.py`
