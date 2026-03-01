@@ -822,6 +822,14 @@ export default function Admin() {
               <BarChart3 className="w-4 h-4 mr-2" />
               Statistiques
             </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-full" data-testid="tab-settings">
+              <Settings className="w-4 h-4 mr-2" />
+              Paramètres
+            </TabsTrigger>
+            <TabsTrigger value="financial" className="rounded-full" data-testid="tab-financial">
+              <DollarSign className="w-4 h-4 mr-2" />
+              Finances
+            </TabsTrigger>
             <TabsTrigger value="feedback" className="rounded-full" data-testid="tab-feedback">
               <MessageSquare className="w-4 h-4 mr-2" />
               Avis ({feedback.length})
