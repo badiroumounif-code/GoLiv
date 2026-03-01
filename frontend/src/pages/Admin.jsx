@@ -227,6 +227,96 @@ export default function Admin() {
     toast.success("Export en cours...");
   };
 
+  // Zone management functions
+  const handleSaveZone = async (zone) => {
+    const pwd = localStorage.getItem("plb_admin_password");
+    setSettingsLoading(true);
+    try {
+      await axios.patch(`${API}/admin/zones/${zone.id}?password=${pwd}`, {
+        nom: zone.nom,
+        prix_base: parseInt(zone.prix_base),
+        paiement_livreur: parseInt(zone.paiement_livreur),
+        is_active: zone.is_active
+      });
+      toast.success("Zone mise à jour");
+      setEditingZone(null);
+      loadAllData();
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleCreateZone = async () => {
+    if (!newZone.nom || !newZone.prix_base || !newZone.paiement_livreur) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
+    const pwd = localStorage.getItem("plb_admin_password");
+    setSettingsLoading(true);
+    try {
+      await axios.post(`${API}/admin/zones?password=${pwd}`, {
+        nom: newZone.nom,
+        prix_base: parseInt(newZone.prix_base),
+        paiement_livreur: parseInt(newZone.paiement_livreur),
+        is_active: true
+      });
+      toast.success("Zone créée");
+      setNewZone({ nom: "", prix_base: "", paiement_livreur: "" });
+      setShowNewZoneForm(false);
+      loadAllData();
+    } catch (error) {
+      toast.error("Erreur lors de la création");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleDeleteZone = async (zoneId) => {
+    const pwd = localStorage.getItem("plb_admin_password");
+    try {
+      await axios.delete(`${API}/admin/zones/${zoneId}?password=${pwd}`);
+      toast.success("Zone supprimée");
+      loadAllData();
+    } catch (error) {
+      toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    const pwd = localStorage.getItem("plb_admin_password");
+    setSettingsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        password: pwd,
+        poids_seuil: platformSettings.poids_seuil,
+        poids_supplement: platformSettings.poids_supplement,
+        commission_type: platformSettings.commission_type,
+        commission_value: platformSettings.commission_value
+      });
+      await axios.put(`${API}/admin/settings?${params.toString()}`);
+      toast.success("Paramètres sauvegardés");
+    } catch (error) {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const loadFinancialData = async () => {
+    const pwd = localStorage.getItem("plb_admin_password");
+    try {
+      let url = `${API}/admin/financial?password=${pwd}`;
+      if (financialDateFrom) url += `&date_from=${financialDateFrom}`;
+      if (financialDateTo) url += `&date_to=${financialDateTo}`;
+      const res = await axios.get(url);
+      setFinancialStats(res.data);
+    } catch (error) {
+      toast.error("Erreur lors du chargement des données financières");
+    }
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
