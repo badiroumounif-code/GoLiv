@@ -624,7 +624,7 @@ export default function MerchantDashboard() {
                     data-testid="select-zone-enlevement"
                   >
                     <option value="">Sélectionner</option>
-                    {zones.map(zone => (
+                    {pickupZones.map(zone => (
                       <option key={zone} value={zone}>{zone}</option>
                     ))}
                   </select>
@@ -632,23 +632,23 @@ export default function MerchantDashboard() {
                 <div>
                   <Label htmlFor="zone_livraison">Zone de livraison *</Label>
                   <select
-                    id="zone_livraison"
-                    name="zone_livraison"
-                    value={newDelivery.zone_livraison}
-                    onChange={handleNewDeliveryChange}
+                    id="zone_livraison_id"
+                    name="zone_livraison_id"
+                    value={newDelivery.zone_livraison_id}
+                    onChange={(e) => handleZoneSelect(e.target.value)}
                     className="w-full mt-1 p-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
                     required
                     data-testid="select-zone-livraison"
                   >
                     <option value="">Sélectionner</option>
-                    {zones.map(zone => (
-                      <option key={zone} value={zone}>{zone}</option>
+                    {availableZones.map(zone => (
+                      <option key={zone.id} value={zone.id}>{zone.nom} - {zone.prix_base.toLocaleString()} FCFA</option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="type_colis">Type de colis *</Label>
                   <select
@@ -678,6 +678,36 @@ export default function MerchantDashboard() {
                   >
                     {urgences.map(u => (
                       <option key={u.value} value={u.value}>{u.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="poids">Poids (kg)</Label>
+                  <div className="relative">
+                    <Scale className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 mt-0.5" />
+                    <Input
+                      id="poids"
+                      name="poids"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={newDelivery.poids}
+                      onChange={handleNewDeliveryChange}
+                      placeholder="Ex: 2.5"
+                      className="rounded-xl mt-1 pl-9"
+                      data-testid="input-poids"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Estimated Price */}
+              {estimatedPrice && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-between">
+                  <span className="text-sm text-green-600">Prix estimé</span>
+                  <span className="text-lg font-bold text-green-700">{estimatedPrice.toLocaleString()} FCFA</span>
+                </div>
+              )}
                     ))}
                   </select>
                 </div>
