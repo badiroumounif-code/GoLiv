@@ -899,16 +899,33 @@ async def create_merchant_delivery(data: MerchantDeliveryCreate, user: dict = De
     if not merchant:
         raise HTTPException(status_code=404, detail="Profil commerçant non trouvé")
     
+    # Generate tracking number
+    tracking_number = await get_next_tracking_number()
+    
+    # Calculate pricing if zone_id provided
+    pricing = None
+    if data.zone_livraison_id:
+        pricing = await calculate_delivery_price(data.zone_livraison_id, data.poids)
+    
     delivery = DeliveryRequest(
+        tracking_number=tracking_number,
         nom=data.nom_client,
         telephone=data.telephone_client,
         zone_enlevement=data.zone_enlevement,
         zone_livraison=data.zone_livraison,
+        zone_livraison_id=data.zone_livraison_id,
         type_colis=data.type_colis,
         urgence=data.urgence,
+        poids=data.poids,
         notes=data.notes,
         merchant_id=merchant["id"],
-        merchant_nom=merchant["nom_entreprise"]
+        merchant_nom=merchant["nom_entreprise"],
+        prix_zone=pricing.get("prix_zone") if pricing else None,
+        supplement_poids=pricing.get("supplement_poids") if pricing else None,
+        prix_total=pricing.get("prix_total") if pricing else None,
+        paiement_livreur=pricing.get("paiement_livreur") if pricing else None,
+        commission_plateforme=pricing.get("commission_plateforme") if pricing else None,
+        last_status_update=datetime.now(timezone.utc).isoformat()
     )
     
     await db.delivery_requests.insert_one(delivery.model_dump())
@@ -919,18 +936,40 @@ async def create_merchant_delivery(data: MerchantDeliveryCreate, user: dict = De
         {"$inc": {"total_commandes": 1}}
     )
     
-    # Send notification
+    # Send notification with tracking
+    prix_display = f"{delivery.prix_total} FCFA" if delivery.prix_total else "À déterminer"
     html = f"""
     <h2>🚚 Nouvelle Commande Commerçant</h2>
+    <p><strong>Numéro de suivi:</strong> <span style="font-size: 18px; font-weight: bold; color: #0ea5e9;">{tracking_number}</span></p>
+    <hr>
     <p><strong>Commerçant:</strong> {merchant['nom_entreprise']}</p>
     <p><strong>Client:</strong> {delivery.nom}</p>
     <p><strong>Téléphone:</strong> {delivery.telephone}</p>
     <p><strong>Trajet:</strong> {delivery.zone_enlevement} → {delivery.zone_livraison}</p>
+    <p><strong>Poids:</strong> {delivery.poids or 'Non spécifié'} kg</p>
+    <p><strong>Prix:</strong> {prix_display}</p>
     <p><strong>Urgence:</strong> {delivery.urgence}</p>
     """
-    await send_notification_email(f"🚚 Commande de {merchant['nom_entreprise']}", html)
+    await send_notification_email(f"🚚 {tracking_number} - Commande de {merchant['nom_entreprise']}", html)
     
-    return delivery
+    # Send tracking to merchant email
+    merchant_html = f"""
+    <h2>✅ Votre commande a été créée</h2>
+    <p><strong>Numéro de suivi:</strong> <span style="font-size: 24px; font-weight: bold; color: #0ea5e9;">{tracking_number}</span></p>
+    <hr>
+    <p><strong>Client:</strong> {delivery.nom}</p>
+    <p><strong>Destination:</strong> {delivery.zone_livraison}</p>
+    <p><strong>Prix:</strong> {prix_display}</p>
+    <p>Conservez ce numéro pour suivre votre livraison.</p>
+    """
+    await send_notification_email(f"📦 Commande {tracking_number} créée", merchant_html, merchant.get('email'))
+    
+    # Return without internal financial data
+    response = delivery.model_dump()
+    response.pop("commission_plateforme", None)
+    response.pop("paiement_livreur", None)
+    
+    return response
 
 @api_router.get("/merchant/stats")
 async def get_merchant_stats(user: dict = Depends(get_current_user)):
