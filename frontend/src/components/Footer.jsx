@@ -13,7 +13,7 @@ export default function Footer() {
                 <Truck className="w-6 h-6 text-white" />
               </div>
               <span className="font-heading font-bold text-xl text-slate-900">
-                PLB Logistique
+                GoLiv Logistique
               </span>
             </Link>
             <p className="text-slate-600 text-sm leading-relaxed">
@@ -105,7 +105,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-slate-600">
                 <Mail className="w-4 h-4 text-sky-500 flex-shrink-0" />
-                <span>contact@plblogistique.com</span>
+                <span>contact@golivlogistique.com</span>
               </li>
             </ul>
           </div>
@@ -114,7 +114,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-slate-200 mt-10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} PLB Logistique. Tous droits réservés.
+            © {new Date().getFullYear()} GoLiv Logistique. Tous droits réservés.
           </p>
           <div className="flex gap-6 text-sm text-slate-500">
             <Link to="/admin" className="hover:text-sky-500 transition-colors">

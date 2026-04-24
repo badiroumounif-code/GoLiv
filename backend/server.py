@@ -39,7 +39,7 @@ SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 
 # Create the main app
-app = FastAPI(title="PLB Logistique API")
+app = FastAPI(title="GoLiv Logistique API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 # Tracking number counter (will be stored in DB)
 async def get_next_tracking_number():
-    """Generate next tracking number in format PLB-YYYY-XXXXXX"""
+    """Generate next tracking number in format GOLIV-YYYY-XXXXXX"""
     year = datetime.now(timezone.utc).year
     counter_doc = await db.counters.find_one_and_update(
         {"_id": "tracking_number"},
@@ -67,7 +67,7 @@ async def get_next_tracking_number():
         return_document=True
     )
     seq = counter_doc.get("seq", 1)
-    return f"PLB-{year}-{seq:06d}"
+    return f"GOLIV-{year}-{seq:06d}"
 
 class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -125,7 +125,7 @@ class UserLogin(BaseModel):
 
 class DeliveryRequest(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    tracking_number: Optional[str] = None  # PLB-YYYY-XXXXXX
+    tracking_number: Optional[str] = None  # GOLIV-YYYY-XXXXXX
     nom: str
     telephone: str
     zone_enlevement: str
@@ -466,7 +466,7 @@ async def init_admin(password: str = Query(...)):
         email="admin@plb.bj",
         password_hash=hash_password(ADMIN_PASSWORD),
         role="admin",
-        nom="Administrateur PLB",
+        nom="Administrateur GoLiv",
         telephone=""
     )
     
@@ -490,7 +490,7 @@ async def init_admin(password: str = Query(...)):
 
 @api_router.get("/")
 async def root():
-    return {"message": "PLB Logistique API", "version": "3.0"}
+    return {"message": "GoLiv Logistique API", "version": "3.0"}
 
 @api_router.get("/health")
 async def health_check():
@@ -1129,7 +1129,7 @@ async def update_merchant_status(merchant_id: str, data: StatusUpdate, password:
         existing_user = await db.users.find_one({"email": merchant["email"].lower()})
         if not existing_user:
             # Generate default password
-            default_password = f"PLB{merchant['telephone'][-4:]}"
+            default_password = f"GoLiv{merchant['telephone'][-4:]}"
             user = User(
                 email=merchant["email"].lower(),
                 password_hash=hash_password(default_password),
@@ -1146,7 +1146,7 @@ async def update_merchant_status(merchant_id: str, data: StatusUpdate, password:
             
             # Send welcome email with credentials
             html = f"""
-            <h2>✅ Bienvenue chez PLB Logistique !</h2>
+            <h2>✅ Bienvenue chez GoLiv Logistique !</h2>
             <p>Bonjour {merchant['nom_contact']},</p>
             <p>Votre candidature commerçant pour <strong>{merchant['nom_entreprise']}</strong> a été acceptée !</p>
             <p>Voici vos identifiants de connexion :</p>
@@ -1155,7 +1155,7 @@ async def update_merchant_status(merchant_id: str, data: StatusUpdate, password:
                 <li><strong>Mot de passe:</strong> {default_password}</li>
             </ul>
             <p>Connectez-vous sur notre plateforme pour gérer vos livraisons.</p>
-            <p>Cordialement,<br>L'équipe PLB Logistique</p>
+            <p>Cordialement,<br>L'équipe GoLiv Logistique</p>
             """
             await send_notification_email(f"✅ Bienvenue {merchant['nom_entreprise']} !", html, merchant['email'])
         else:
@@ -1173,13 +1173,13 @@ async def update_merchant_status(merchant_id: str, data: StatusUpdate, password:
         status_label = status_labels.get(data.status, data.status)
         
         html = f"""
-        <h2>Mise à jour de votre candidature - PLB Logistique</h2>
+        <h2>Mise à jour de votre candidature - GoLiv Logistique</h2>
         <p>Bonjour {merchant['nom_contact']},</p>
         <p>Votre candidature pour <strong>{merchant['nom_entreprise']}</strong> a été <strong>{status_label}</strong>.</p>
         {"<p><strong>Raison:</strong> " + data.reason + "</p>" if data.reason else ""}
-        <p>Cordialement,<br>L'équipe PLB Logistique</p>
+        <p>Cordialement,<br>L'équipe GoLiv Logistique</p>
         """
-        await send_notification_email(f"PLB Logistique - Candidature {status_label}", html, merchant['email'])
+        await send_notification_email(f"GoLiv Logistique - Candidature {status_label}", html, merchant['email'])
     
     return {"success": True, "message": f"Statut mis à jour: {data.status}"}
 
@@ -1202,7 +1202,7 @@ async def update_rider_status(rider_id: str, data: StatusUpdate, password: str =
         existing_user = await db.users.find_one({"email": rider["email"].lower()})
         if not existing_user:
             # Generate default password
-            default_password = f"PLB{rider['telephone'][-4:]}"
+            default_password = f"GoLiv{rider['telephone'][-4:]}"
             user = User(
                 email=rider["email"].lower(),
                 password_hash=hash_password(default_password),
@@ -1219,7 +1219,7 @@ async def update_rider_status(rider_id: str, data: StatusUpdate, password: str =
             
             # Send welcome email with credentials
             html = f"""
-            <h2>✅ Bienvenue chez PLB Logistique !</h2>
+            <h2>✅ Bienvenue chez GoLiv Logistique !</h2>
             <p>Bonjour {rider['prenom']} {rider['nom']},</p>
             <p>Votre candidature livreur a été acceptée !</p>
             <p>Voici vos identifiants de connexion :</p>
@@ -1228,7 +1228,7 @@ async def update_rider_status(rider_id: str, data: StatusUpdate, password: str =
                 <li><strong>Mot de passe:</strong> {default_password}</li>
             </ul>
             <p>Connectez-vous sur notre plateforme pour voir vos livraisons assignées.</p>
-            <p>Cordialement,<br>L'équipe PLB Logistique</p>
+            <p>Cordialement,<br>L'équipe GoLiv Logistique</p>
             """
             await send_notification_email(f"✅ Bienvenue {rider['prenom']} !", html, rider['email'])
         else:
@@ -1245,13 +1245,13 @@ async def update_rider_status(rider_id: str, data: StatusUpdate, password: str =
         status_label = status_labels.get(data.status, data.status)
         
         html = f"""
-        <h2>Mise à jour de votre candidature - PLB Logistique</h2>
+        <h2>Mise à jour de votre candidature - GoLiv Logistique</h2>
         <p>Bonjour {rider['prenom']} {rider['nom']},</p>
         <p>Votre candidature livreur a été <strong>{status_label}</strong>.</p>
         {"<p><strong>Raison:</strong> " + data.reason + "</p>" if data.reason else ""}
-        <p>Cordialement,<br>L'équipe PLB Logistique</p>
+        <p>Cordialement,<br>L'équipe GoLiv Logistique</p>
         """
-        await send_notification_email(f"PLB Logistique - Candidature {status_label}", html, rider['email'])
+        await send_notification_email(f"GoLiv Logistique - Candidature {status_label}", html, rider['email'])
     
     return {"success": True, "message": f"Statut mis à jour: {data.status}"}
 
@@ -1355,7 +1355,7 @@ async def assign_delivery_to_rider(delivery_id: str, data: AssignRider, password
         <li><strong>Urgence:</strong> {delivery['urgence']}</li>
     </ul>
     <p>Connectez-vous à votre espace livreur pour accepter ou refuser cette livraison.</p>
-    <p>Cordialement,<br>L'équipe PLB Logistique</p>
+    <p>Cordialement,<br>L'équipe GoLiv Logistique</p>
     """
     await send_notification_email(f"🚚 Nouvelle livraison assignée", html, rider['email'])
     

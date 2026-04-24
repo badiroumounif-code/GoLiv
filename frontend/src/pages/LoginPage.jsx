@@ -92,7 +92,7 @@ export default function LoginPage() {
             <p className="text-sky-100 text-sm">
               {isLogin 
                 ? "Accédez à votre espace personnel" 
-                : "Rejoignez PLB Logistique"}
+                : "Rejoignez GoLiv Logistique"}
             </p>
           </div>
 

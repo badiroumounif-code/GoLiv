@@ -11,7 +11,7 @@ const faqCategories = [
     questions: [
       {
         question: "Comment fonctionne le suivi de colis ?",
-        answer: "Chaque livraison se voit attribuer un numéro de suivi unique au format PLB-YYYY-XXXXXX (ex: PLB-2026-000123). Vous pouvez suivre votre colis en entrant ce numéro directement sur notre page d'accueil. Le statut est mis à jour en temps réel : En attente → Assigné → En cours → Livré."
+        answer: "Chaque livraison se voit attribuer un numéro de suivi unique au format GOLIV-YYYY-XXXXXX (ex: GOLIV-2026-000123). Vous pouvez suivre votre colis en entrant ce numéro directement sur notre page d'accueil. Le statut est mis à jour en temps réel : En attente → Assigné → En cours → Livré."
       },
       {
         question: "Où trouver mon numéro de suivi ?",
@@ -19,7 +19,7 @@ const faqCategories = [
       },
       {
         question: "Le suivi ne fonctionne pas, que faire ?",
-        answer: "Vérifiez que vous avez bien saisi le numéro complet (ex: PLB-2026-000123, avec les tirets). Si le problème persiste, contactez notre service client par téléphone ou via le formulaire de contact."
+        answer: "Vérifiez que vous avez bien saisi le numéro complet (ex: GOLIV-2026-000123, avec les tirets). Si le problème persiste, contactez notre service client par téléphone ou via le formulaire de contact."
       }
     ]
   },
@@ -87,7 +87,7 @@ const faqCategories = [
     questions: [
       {
         question: "Comment contacter le service client ?",
-        answer: "Vous pouvez nous joindre par téléphone au +229 97 00 00 00 (du lundi au samedi, 8h-20h), par email à contact@plb-logistique.bj, ou via notre formulaire de contact sur le site. Pour les urgences liées à une livraison en cours, privilégiez le téléphone."
+        answer: "Vous pouvez nous joindre par téléphone au +229 97 00 00 00 (du lundi au samedi, 8h-20h), par email à contact@goliv-logistique.bj, ou via notre formulaire de contact sur le site. Pour les urgences liées à une livraison en cours, privilégiez le téléphone."
       },
       {
         question: "Comment devenir partenaire livreur ?",

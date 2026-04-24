@@ -24,7 +24,7 @@ export default function About() {
     {
       name: "L'équipe de direction",
       role: "Gestion et stratégie",
-      description: "Une équipe passionnée qui pilote la vision de PLB Logistique."
+      description: "Une équipe passionnée qui pilote la vision de GoLiv Logistique."
     },
     {
       name: "Nos livreurs",
@@ -50,10 +50,10 @@ export default function About() {
           >
             <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Notre histoire</span>
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-4">
-              À propos de PLB Logistique
+              À propos de GoLiv Logistique
             </h1>
             <p className="text-lg text-slate-600 leading-relaxed">
-              Née de la volonté de moderniser la livraison au Bénin, PLB Logistique s&apos;engage 
+              Née de la volonté de moderniser la livraison au Bénin, GoLiv Logistique s&apos;engage 
               à offrir un service de qualité, accessible et fiable à tous.
             </p>
           </motion.div>
@@ -71,7 +71,7 @@ export default function About() {
             >
               <img
                 src="https://images.unsplash.com/photo-1768796373360-95d80c5830fb?w=800"
-                alt="Équipe PLB Logistique"
+                alt="Équipe GoLiv Logistique"
                 className="w-full h-80 object-cover rounded-3xl"
               />
             </motion.div>
@@ -87,12 +87,12 @@ export default function About() {
                 Simplifier la logistique pour tous
               </h2>
               <p className="text-slate-600 leading-relaxed">
-                PLB Logistique est née d&apos;un constat simple : la livraison de colis au Bénin peut être 
+                GoLiv Logistique est née d&apos;un constat simple : la livraison de colis au Bénin peut être 
                 compliquée, coûteuse et peu fiable. Nous avons décidé de changer cela.
               </p>
               <p className="text-slate-600 leading-relaxed">
                 Notre mission est de rendre la livraison accessible à tous, que vous soyez un particulier 
-                envoyant un colis à un proche ou un commerçant livrant ses clients. Avec PLB Logistique, 
+                envoyant un colis à un proche ou un commerçant livrant ses clients. Avec GoLiv Logistique, 
                 chaque envoi est entre de bonnes mains.
               </p>
               <div className="flex items-center gap-6 pt-4">
@@ -162,7 +162,7 @@ export default function About() {
           >
             <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Notre équipe</span>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
-              Les personnes derrière PLB
+              Les personnes derrière GoLiv
             </h2>
           </motion.div>
 

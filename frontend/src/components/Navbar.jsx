@@ -63,7 +63,7 @@ export default function Navbar() {
               <Truck className="w-6 h-6 text-white" />
             </div>
             <span className="font-heading font-bold text-xl text-slate-900">
-              PLB Logistique
+              GoLiv Logistique
             </span>
           </Link>
 

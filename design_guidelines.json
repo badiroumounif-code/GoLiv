@@ -1,6 +1,6 @@
 {
   "identity": {
-    "name": "PLB Logistique",
+    "name": "GoLiv Logistique",
     "mission": "Simplifying logistics in Benin with speed, trust, and modern technology.",
     "tone": "Professional, Friendly, Efficient, Approachable",
     "target_audience": "Local businesses, individuals, and riders in Cotonou, Porto-Novo, Calavi",
@@ -138,5 +138,5 @@
     "Use 'sonner' for all toast notifications.",
     "Use Shadcn UI components but customize their styling to match the 'Soft/Rounded' aesthetic."
   ],
-  "instructions_to_main_agent": "You are building the frontend for PLB Logistique. Start by setting up the global CSS and Tailwind config to match the 'colors' and 'typography' sections. Then, build the 'Home' page using the 'hero_rider' image and the 'Bento Grid' layout for features. Proceed to build the 'Delivery Request' form using Shadcn Form components. Ensure all text is in French."
+  "instructions_to_main_agent": "You are building the frontend for GoLiv Logistique. Start by setting up the global CSS and Tailwind config to match the 'colors' and 'typography' sections. Then, build the 'Home' page using the 'hero_rider' image and the 'Bento Grid' layout for features. Proceed to build the 'Delivery Request' form using Shadcn Form components. Ensure all text is in French."
 }

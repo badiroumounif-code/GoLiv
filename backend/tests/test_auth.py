@@ -1,5 +1,5 @@
 """
-Backend API Tests for PLB Logistique Authentication System
+Backend API Tests for GoLiv Logistique Authentication System
 Tests: Login, Registration, JWT tokens, Role-based access
 """
 import pytest
@@ -25,7 +25,7 @@ class TestHealthAndBasics:
         response = requests.get(f"{BASE_URL}/api/")
         assert response.status_code == 200
         data = response.json()
-        assert "PLB Logistique" in data["message"]
+        assert "GoLiv Logistique" in data["message"]
         print("SUCCESS: API root endpoint working")
 
 

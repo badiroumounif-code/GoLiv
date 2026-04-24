@@ -1,5 +1,5 @@
 """
-Backend API Tests for PLB Logistique - Tracking, Zones, and Financial Features
+Backend API Tests for GoLiv Logistique - Tracking, Zones, and Financial Features
 Tests: Tracking numbers, Zone-based pricing, Weight surcharge, Financial dashboard
 """
 import pytest
@@ -291,7 +291,7 @@ class TestDeliveryCreationWithPricing:
         
         # Check tracking number generated
         assert "tracking_number" in data
-        assert data["tracking_number"].startswith("PLB-")
+        assert data["tracking_number"].startswith("GOLIV-")
         
         # Check pricing applied
         assert "prix_zone" in data
@@ -349,7 +349,7 @@ class TestDeliveryRequestsWithTracking:
             delivery = data[0]
             assert "tracking_number" in delivery
             if delivery["tracking_number"]:
-                assert delivery["tracking_number"].startswith("PLB-")
+                assert delivery["tracking_number"].startswith(("PLB-", "GOLIV-"))
             print(f"SUCCESS: Admin delivery list includes tracking numbers")
             print(f"  - Sample tracking: {delivery.get('tracking_number', 'N/A')}")
         else:

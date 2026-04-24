@@ -730,7 +730,7 @@ export default function Admin() {
               <h1 className="font-heading text-2xl font-bold text-slate-900">
                 Tableau de bord
               </h1>
-              <p className="text-sm text-slate-500">Gestion PLB Logistique</p>
+              <p className="text-sm text-slate-500">Gestion GoLiv Logistique</p>
             </div>
             <div className="flex items-center gap-3">
               <Button

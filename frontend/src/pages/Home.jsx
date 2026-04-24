@@ -123,7 +123,7 @@ export default function Home() {
               </h1>
               
               <p className="text-lg text-slate-600 max-w-lg leading-relaxed">
-                PLB Logistique est votre partenaire de confiance pour la livraison de colis à Cotonou, 
+                GoLiv Logistique est votre partenaire de confiance pour la livraison de colis à Cotonou, 
                 Porto-Novo et Calavi. Rapide, fiable et à votre service.
               </p>
               
@@ -169,7 +169,7 @@ export default function Home() {
               <div className="relative">
                 <img
                   src="https://images.pexels.com/photos/12725436/pexels-photo-12725436.jpeg"
-                  alt="Livreur PLB Logistique"
+                  alt="Livreur GoLiv Logistique"
                   className="w-full h-[500px] object-cover rounded-3xl shadow-2xl"
                 />
                 <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-lg border border-slate-100">
@@ -213,7 +213,7 @@ export default function Home() {
                   type="text"
                   value={trackingNumber}
                   onChange={(e) => setTrackingNumber(e.target.value.toUpperCase())}
-                  placeholder="PLB-2026-000001"
+                  placeholder="GOLIV-2026-000001"
                   className="pl-12 h-14 text-lg rounded-xl bg-white border-0"
                   data-testid="tracking-input"
                 />
@@ -332,7 +332,7 @@ export default function Home() {
           >
             <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Nos avantages</span>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
-              Pourquoi choisir PLB Logistique ?
+              Pourquoi choisir GoLiv Logistique ?
             </h2>
           </motion.div>
 
@@ -429,7 +429,7 @@ export default function Home() {
                 Prêt à expédier ?
               </h2>
               <p className="text-sky-100 max-w-2xl mx-auto mb-8">
-                Faites confiance à PLB Logistique pour vos livraisons. Simple, rapide et fiable.
+                Faites confiance à GoLiv Logistique pour vos livraisons. Simple, rapide et fiable.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/demande-livraison">
@@ -468,12 +468,12 @@ export default function Home() {
               {
                 name: "Aïcha K.",
                 role: "Commerçante, Cotonou",
-                text: "PLB Logistique a transformé mon business. Mes clients reçoivent leurs commandes rapidement et en parfait état."
+                text: "GoLiv Logistique a transformé mon business. Mes clients reçoivent leurs commandes rapidement et en parfait état."
               },
               {
                 name: "Emmanuel D.",
                 role: "Entrepreneur, Porto-Novo",
-                text: "Service fiable et professionnel. Je recommande PLB Logistique à tous mes collègues entrepreneurs."
+                text: "Service fiable et professionnel. Je recommande GoLiv Logistique à tous mes collègues entrepreneurs."
               },
               {
                 name: "Fatou S.",

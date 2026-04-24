@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for PLB Logistique
+Backend API Testing for GoLiv Logistique
 Tests all endpoints including forms submission and admin functionality
 """
 
@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 class PLBLogistiqueAPITester:
-    def __init__(self, base_url="https://benin-delivery.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://plb-track.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.admin_password = "plb2024"
         self.tests_run = 0
@@ -308,7 +308,7 @@ class PLBLogistiqueAPITester:
 
     def run_all_tests(self):
         """Run all backend tests"""
-        print("🚀 Starting PLB Logistique Backend API Tests")
+        print("🚀 Starting GoLiv Logistique Backend API Tests")
         print(f"Testing against: {self.base_url}")
         print("=" * 60)
         

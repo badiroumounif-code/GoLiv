@@ -1,7 +1,7 @@
-# PLB Logistique - Product Requirements Document
+# GoLiv Logistique - Product Requirements Document
 
 ## Original Problem Statement
-Build a fully functional, interactive logistics website for PLB Logistique, operating in Benin (Cotonou, Porto-Novo, Calavi). Multi-phase development including public forms, admin dashboard, multi-user authentication, and advanced pricing/tracking system.
+Build a fully functional, interactive logistics website for GoLiv Logistique, operating in Benin (Cotonou, Porto-Novo, Calavi). Multi-phase development including public forms, admin dashboard, multi-user authentication, and advanced pricing/tracking system.
 
 ## User Personas
 1. **Clients** - Need to request deliveries and track packages
@@ -33,7 +33,7 @@ Build a fully functional, interactive logistics website for PLB Logistique, oper
 ### Phase 4 - Tracking & Pricing System ✅ (December 2025)
 
 **Tracking System:**
-- Automatic tracking number generation: `PLB-YYYY-XXXXXX`
+- Automatic tracking number generation: `GOLIV-YYYY-XXXXXX`
 - Public tracking on homepage (no separate page needed)
 - Real-time status updates
 - Tracking number sent via email

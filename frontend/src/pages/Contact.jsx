@@ -58,7 +58,7 @@ export default function Contact() {
     {
       icon: <Mail className="w-5 h-5" />,
       title: "Email",
-      content: "contact@plblogistique.com"
+      content: "contact@golivlogistique.com"
     },
     {
       icon: <Clock className="w-5 h-5" />,
