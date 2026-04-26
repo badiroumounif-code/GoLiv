@@ -89,8 +89,8 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-slate-600 rounded-full whitespace-nowrap" data-testid="partner-dropdown">
-                  Devenir partenaire
+                <Button variant="ghost" className="text-slate-600 rounded-full whitespace-nowrap px-3 xl:px-4" data-testid="partner-dropdown">
+                  Partenaire
                   <ChevronDown className="ml-1 w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -144,7 +144,7 @@ export default function Navbar() {
               </Link>
             )}
             
-            <Link to="/demande-livraison">
+            <Link to="/demande-livraison" className="hidden xl:inline-flex">
               <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-5 xl:px-6 whitespace-nowrap" data-testid="request-delivery-btn">
                 Demander une livraison
               </Button>

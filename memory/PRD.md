@@ -73,6 +73,23 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 - Accordion-style questions
 - Contact CTA section
 
+### Phase 6 - PLB → GoLiv Rebrand ✅ (December 2025)
+- Renamed all textual references "PLB Logistique" → "GoLiv Logistique"
+- New tracking format: `GOLIV-YYYY-XXXXXX` (legacy `PLB-` numbers remain readable for backward compat)
+- Updated email templates, API title, page labels, alt texts, FAQ examples
+- Preserved: admin credentials (`admin@plb.bj` / `plb2024`), JWT secret, localStorage keys, deployment URL
+
+### Phase 7 - UI/Layout Improvements ✅ (December 2025)
+- **CRITICAL FIX**: `App.css` was never imported into `App.js` — all custom utility classes were dead. Now properly imported.
+- New utility class hierarchy: `.heading-hero`, `.heading-section`, `.heading-card`, `.eyebrow-label`, `.body-lead`, `.feature-card`, `.section-padding`, `.section-padding-sm`, `.container-custom`
+- Container padding improved for mobile: `px-5 sm:px-6 md:px-8 lg:px-10`
+- Section padding standardized: `py-16 md:py-20 lg:py-24` with smaller variant for CTA bands
+- Hero typography upgraded across all pages: `text-4xl sm:text-5xl lg:text-6xl` with tight tracking
+- Eyebrow labels: uppercase, sky-500, tracked spacing for stronger visual hierarchy
+- Card hover lift: `-translate-y-1` on hover with shadow transition
+- Navbar: `whitespace-nowrap` + `shrink-0` to prevent text wrapping; CTA hidden below `xl` to prevent overflow
+- Dashboards (Admin, Merchant, Rider): bigger H1, uppercase eyebrow tag, increased section padding `py-8 md:py-10`, gap-4 md:gap-5
+
 ---
 
 ## Technical Architecture
@@ -127,13 +144,18 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 - [x] Weight surcharge
 - [x] Financial dashboard
 - [x] FAQ redesign
+- [x] PLB → GoLiv rebrand
+- [x] UI/Layout improvements (typography, spacing, mobile responsiveness)
 
-### P1 - Next Priority
+### P1 - Next Priority (refactoring + features)
+- [ ] Refactor `server.py` (~1800 lines) into routes/auth.py, routes/deliveries.py, routes/admin.py, models.py
+- [ ] Refactor `Admin.jsx` (~2350 lines) into sub-components (FinancialDashboard.jsx, ZoneManager.jsx, etc.)
 - [ ] Configure Resend for production emails (domain verification needed)
-- [ ] Real-time notifications (WebSocket)
+- [ ] Real-time push notifications for delivery status (WebSocket or SSE)
 - [ ] Proof of delivery (photo upload)
 
 ### P2 - Future
+- [ ] Export charts/graphs from admin dashboard to PDF/CSV
 - [ ] GPS tracking integration
 - [ ] Mobile app
 - [ ] Payment integration (Mobile Money)
@@ -143,6 +165,6 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 
 ## Testing
 
-- Backend: 100% (19/19 tests passed)
-- Frontend: 100%
-- Test files: `/app/backend/tests/test_tracking_zones_financial.py`
+- Backend: 42/42 tests passed (`/app/backend/tests/`)
+- Frontend: tested via testing_agent_v3_fork (iteration_4) — UI overhaul verified, no overflow at 1440px after navbar fix
+- Test files: `test_tracking_zones_financial.py`, `test_auth.py`
