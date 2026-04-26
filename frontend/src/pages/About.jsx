@@ -48,11 +48,11 @@ export default function About() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Notre histoire</span>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-4">
+            <span className="eyebrow-label">Notre histoire</span>
+            <h1 className="heading-hero mt-3 mb-5">
               À propos de GoLiv Logistique
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="body-lead">
               Née de la volonté de moderniser la livraison au Bénin, GoLiv Logistique s&apos;engage 
               à offrir un service de qualité, accessible et fiable à tous.
             </p>
@@ -63,7 +63,7 @@ export default function About() {
       {/* Story Section */}
       <section className="section-padding">
         <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -72,7 +72,7 @@ export default function About() {
               <img
                 src="https://images.unsplash.com/photo-1768796373360-95d80c5830fb?w=800"
                 alt="Équipe GoLiv Logistique"
-                className="w-full h-80 object-cover rounded-3xl"
+                className="w-full h-72 md:h-[420px] object-cover rounded-3xl shadow-soft"
               />
             </motion.div>
 
@@ -80,10 +80,10 @@ export default function About() {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="space-y-6"
+              className="space-y-5"
             >
-              <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Notre mission</span>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900">
+              <span className="eyebrow-label">Notre mission</span>
+              <h2 className="heading-section">
                 Simplifier la logistique pour tous
               </h2>
               <p className="text-slate-600 leading-relaxed">
@@ -95,7 +95,7 @@ export default function About() {
                 envoyant un colis à un proche ou un commerçant livrant ses clients. Avec GoLiv Logistique, 
                 chaque envoi est entre de bonnes mains.
               </p>
-              <div className="flex items-center gap-6 pt-4">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-3">
                 <div className="flex items-center gap-2">
                   <Truck className="w-5 h-5 text-sky-500" />
                   <span className="text-slate-700 font-medium">Livraison rapide</span>
@@ -117,15 +117,15 @@ export default function About() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-12 md:mb-16 max-w-2xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Nos valeurs</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
+            <span className="eyebrow-label">Nos valeurs</span>
+            <h2 className="heading-section mt-3">
               Ce qui nous guide
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {values.map((value, index) => (
               <motion.div
                 key={index}
@@ -133,16 +133,16 @@ export default function About() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-8 border border-slate-100 shadow-soft text-center"
+                className="feature-card text-center"
                 data-testid={`value-${index}`}
               >
                 <div className="w-14 h-14 bg-sky-50 rounded-2xl flex items-center justify-center text-sky-500 mx-auto mb-4">
                   {value.icon}
                 </div>
-                <h3 className="font-heading font-semibold text-xl text-slate-900 mb-2">
+                <h3 className="heading-card mb-2">
                   {value.title}
                 </h3>
-                <p className="text-slate-600 leading-relaxed">
+                <p className="text-slate-600 leading-relaxed text-sm md:text-base">
                   {value.description}
                 </p>
               </motion.div>
@@ -158,15 +158,15 @@ export default function About() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-12 md:mb-16 max-w-2xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Notre équipe</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
+            <span className="eyebrow-label">Notre équipe</span>
+            <h2 className="heading-section mt-3">
               Les personnes derrière GoLiv
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {team.map((member, index) => (
               <motion.div
                 key={index}
@@ -174,13 +174,13 @@ export default function About() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-6 border border-slate-100 shadow-soft"
+                className="feature-card"
                 data-testid={`team-${index}`}
               >
                 <div className="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mb-4">
                   <Users className="w-8 h-8 text-sky-600" />
                 </div>
-                <h3 className="font-heading font-semibold text-lg text-slate-900 mb-1">
+                <h3 className="heading-card mb-1">
                   {member.name}
                 </h3>
                 <p className="text-sky-500 text-sm font-medium mb-2">{member.role}</p>
@@ -194,7 +194,7 @@ export default function About() {
       </section>
 
       {/* Coverage Section */}
-      <section className="section-padding bg-slate-50">
+      <section className="section-padding-sm bg-slate-50">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -202,26 +202,26 @@ export default function About() {
             viewport={{ once: true }}
             className="bg-white rounded-3xl p-8 md:p-12 border border-slate-100 shadow-soft"
           >
-            <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div className="grid sm:grid-cols-3 gap-8 text-center">
               <div>
                 <div className="w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <MapPin className="w-8 h-8 text-sky-500" />
                 </div>
-                <h3 className="font-heading font-bold text-2xl text-slate-900 mb-2">Cotonou</h3>
+                <h3 className="font-heading font-bold text-xl md:text-2xl text-slate-900 mb-2">Cotonou</h3>
                 <p className="text-slate-600">Capitale économique</p>
               </div>
               <div>
                 <div className="w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <MapPin className="w-8 h-8 text-sky-500" />
                 </div>
-                <h3 className="font-heading font-bold text-2xl text-slate-900 mb-2">Porto-Novo</h3>
+                <h3 className="font-heading font-bold text-xl md:text-2xl text-slate-900 mb-2">Porto-Novo</h3>
                 <p className="text-slate-600">Capitale administrative</p>
               </div>
               <div>
                 <div className="w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <MapPin className="w-8 h-8 text-sky-500" />
                 </div>
-                <h3 className="font-heading font-bold text-2xl text-slate-900 mb-2">Calavi</h3>
+                <h3 className="font-heading font-bold text-xl md:text-2xl text-slate-900 mb-2">Calavi</h3>
                 <p className="text-slate-600">Zone en expansion</p>
               </div>
             </div>

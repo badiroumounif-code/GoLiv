@@ -2,7 +2,7 @@
 
 /* Hero background pattern */
 .hero-pattern {
-  background-image: 
+  background-image:
     radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
     radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 40%);
 }
@@ -30,23 +30,63 @@
 
 /* Glass navigation */
 .nav-glass {
-  @apply bg-white/90 backdrop-blur-md border-b border-slate-100/50;
+  @apply bg-white/85 backdrop-blur-md border-b border-slate-100/60;
 }
 
-/* Section spacing */
+/* ===== Section spacing scale ===== */
+/* Default section padding (full sections) */
 .section-padding {
-  @apply py-16 md:py-24;
+  @apply py-16 md:py-20 lg:py-24;
 }
 
-/* Container */
+/* Smaller section padding for tighter, more focused sections (CTA bands, callouts) */
+.section-padding-sm {
+  @apply py-12 md:py-16;
+}
+
+/* ===== Container ===== */
 .container-custom {
-  @apply max-w-7xl mx-auto px-4 md:px-8;
+  @apply max-w-7xl mx-auto px-5 sm:px-6 md:px-8 lg:px-10;
 }
 
-/* Feature card */
+/* Narrow content container (max-width prose-like) */
+.container-narrow {
+  @apply max-w-3xl mx-auto px-5 sm:px-6 md:px-8;
+}
+
+/* ===== Typography utilities (consistent hierarchy) ===== */
+.heading-hero {
+  @apply font-heading font-bold text-slate-900 leading-[1.1] tracking-tight;
+  @apply text-4xl sm:text-5xl lg:text-6xl;
+}
+
+.heading-section {
+  @apply font-heading font-bold text-slate-900 leading-tight tracking-tight;
+  @apply text-3xl md:text-4xl lg:text-[2.5rem];
+}
+
+.heading-card {
+  @apply font-heading font-semibold text-slate-900;
+  @apply text-lg md:text-xl;
+}
+
+.eyebrow-label {
+  @apply text-sky-500 font-semibold text-xs md:text-sm uppercase tracking-[0.15em];
+}
+
+.body-lead {
+  @apply text-base md:text-lg text-slate-600 leading-relaxed;
+}
+
+/* ===== Cards ===== */
 .feature-card {
-  @apply bg-white rounded-2xl p-8 border border-slate-100;
+  @apply bg-white rounded-2xl p-6 md:p-8 border border-slate-100;
   @apply shadow-soft hover:shadow-hover transition-all duration-300;
+  @apply hover:-translate-y-1;
+}
+
+.surface-card {
+  @apply bg-white rounded-2xl border border-slate-100 shadow-soft;
 }
 
 /* Form input styles */
@@ -57,7 +97,7 @@
 
 /* Stats number */
 .stat-number {
-  @apply text-4xl md:text-5xl font-bold text-sky-500 font-heading;
+  @apply text-4xl md:text-5xl font-bold text-sky-500 font-heading leading-tight;
 }
 
 /* Zone badges */
@@ -125,3 +165,11 @@
     transform: translateY(0);
   }
 }
+
+/* Smooth focus rings for accessibility */
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible {
+  @apply outline-none ring-2 ring-sky-400 ring-offset-2;
+}
+
+/* Subtle gradient blob (defined globally in index.css) */

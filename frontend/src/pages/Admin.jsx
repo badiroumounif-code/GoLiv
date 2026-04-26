@@ -724,15 +724,15 @@ export default function Admin() {
     <div className="min-h-screen bg-slate-50" data-testid="admin-dashboard">
       {/* Header */}
       <div className="bg-white border-b border-slate-100 sticky top-16 z-40">
-        <div className="container-custom py-4">
-          <div className="flex items-center justify-between">
+        <div className="container-custom py-4 md:py-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="font-heading text-2xl font-bold text-slate-900">
+              <h1 className="font-heading text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
                 Tableau de bord
               </h1>
-              <p className="text-sm text-slate-500">Gestion GoLiv Logistique</p>
+              <p className="text-sm text-slate-500 mt-0.5">Gestion GoLiv Logistique</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 size="sm"
@@ -760,8 +760,8 @@ export default function Admin() {
       </div>
 
       {/* Stats Overview */}
-      <div className="container-custom py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="container-custom py-6 md:py-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-6 md:mb-8">
           <div className="bg-white rounded-2xl p-4 border border-slate-100">
             <div className="flex items-center justify-between mb-2">
               <Package className="w-5 h-5 text-sky-500" />

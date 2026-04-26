@@ -281,15 +281,15 @@ export default function MerchantDashboard() {
     <div className="min-h-screen bg-slate-50" data-testid="merchant-dashboard">
       {/* Header */}
       <div className="bg-gradient-to-br from-sky-500 to-sky-600 text-white">
-        <div className="container-custom py-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="container-custom py-8 md:py-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
             <div>
-              <p className="text-sky-100 text-sm mb-1">Espace Commerçant</p>
-              <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-                <Building2 className="w-8 h-8" />
+              <p className="text-sky-100 text-sm mb-1.5 uppercase tracking-wider font-medium">Espace Commerçant</p>
+              <h1 className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold flex items-center gap-3 tracking-tight">
+                <Building2 className="w-7 h-7 md:w-8 md:h-8" />
                 {profile?.nom_entreprise}
               </h1>
-              <p className="text-sky-100 mt-1">
+              <p className="text-sky-100 mt-2">
                 Contact: {profile?.nom_contact}
               </p>
             </div>
@@ -334,10 +334,10 @@ export default function MerchantDashboard() {
         </div>
       </div>
 
-      <div className="container-custom py-8">
+      <div className="container-custom py-8 md:py-10">
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5 mb-8 md:mb-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

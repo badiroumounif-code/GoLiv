@@ -122,11 +122,11 @@ export default function PartnerRider() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Recrutement</span>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-4">
+            <span className="eyebrow-label">Recrutement</span>
+            <h1 className="heading-hero mt-3 mb-5">
               Devenir livreur partenaire
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="body-lead">
               Rejoignez notre équipe de livreurs et gagnez de l&apos;argent en livrant des colis 
               dans votre zone. Horaires flexibles et rémunération attractive.
             </p>
@@ -135,9 +135,9 @@ export default function PartnerRider() {
       </section>
 
       {/* Benefits */}
-      <section className="py-12 bg-white">
+      <section className="section-padding-sm bg-white">
         <div className="container-custom">
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 max-w-5xl mx-auto">
             {[
               { title: "Horaires flexibles", desc: "Travaillez selon votre disponibilité" },
               { title: "Rémunération attractive", desc: "Gagnez par livraison effectuée" },

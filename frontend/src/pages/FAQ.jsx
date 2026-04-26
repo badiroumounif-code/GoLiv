@@ -151,17 +151,17 @@ export default function FAQ() {
   return (
     <div className="min-h-screen" data-testid="faq-page">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-sky-500 to-sky-600 py-16 md:py-24">
+      <section className="bg-gradient-to-br from-sky-500 to-sky-600 py-16 md:py-20 lg:py-24">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-3xl mx-auto text-center"
           >
-            <h1 className="font-heading text-3xl md:text-5xl font-bold text-white mb-6">
+            <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 leading-[1.1] tracking-tight">
               Foire Aux Questions
             </h1>
-            <p className="text-sky-100 text-lg mb-8">
+            <p className="text-sky-100 text-base md:text-lg mb-8">
               Trouvez rapidement les réponses à vos questions sur nos services de livraison
             </p>
             
@@ -214,9 +214,9 @@ export default function FAQ() {
       </section>
 
       {/* FAQ Content */}
-      <section className="py-12 md:py-16">
+      <section className="section-padding-sm">
         <div className="container-custom">
-          <div className="max-w-3xl mx-auto space-y-10">
+          <div className="max-w-3xl mx-auto space-y-10 md:space-y-12">
             {filteredCategories.length === 0 ? (
               <div className="text-center py-12">
                 <AlertCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
@@ -257,16 +257,16 @@ export default function FAQ() {
       </section>
 
       {/* Contact CTA */}
-      <section className="py-12 bg-slate-50">
+      <section className="section-padding-sm bg-slate-50">
         <div className="container-custom">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold text-slate-900 mb-4 tracking-tight">
               Vous n'avez pas trouvé votre réponse ?
             </h2>
-            <p className="text-slate-600 mb-6">
+            <p className="text-slate-600 mb-7 md:mb-8">
               Notre équipe est là pour vous aider. Contactez-nous directement.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <a
                 href="tel:+22997000000"
                 className="flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 rounded-full font-medium transition-colors"

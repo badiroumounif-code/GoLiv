@@ -78,15 +78,15 @@ export default function LoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md mx-4 relative z-10"
+        className="w-full max-w-md px-5 sm:px-0 sm:mx-4 relative z-10"
       >
         <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-br from-sky-500 to-sky-600 p-8 text-center text-white">
+          <div className="bg-gradient-to-br from-sky-500 to-sky-600 p-8 md:p-10 text-center text-white">
             <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Truck className="w-8 h-8" />
             </div>
-            <h1 className="text-2xl font-bold mb-2">
+            <h1 className="font-heading text-2xl md:text-3xl font-bold mb-2 tracking-tight">
               {isLogin ? "Connexion" : "Créer un compte"}
             </h1>
             <p className="text-sky-100 text-sm">
@@ -97,7 +97,7 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-5" data-testid="login-form">
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-5" data-testid="login-form">
             {!isLogin && (
               <>
                 {/* Role Selection */}

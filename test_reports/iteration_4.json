@@ -1,0 +1,59 @@
+{
+  "summary": "Frontend-only UI/responsive review for GoLiv Logistique rebrand (P0 layout improvements). Tested 11 public pages + admin dashboard at desktop 1440, tablet 768, mobile 375. Login flow validated (admin@plb.bj/plb2024). Hero typography, eyebrow labels, hamburger menu, tracking input, and footer all working. Found one HIGH-priority regression: navbar horizontal overflow on desktop 1440px viewport caused by `shrink-0` (added in this very iteration) which pushes the right-side CTA past the viewport edge.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Navbar.jsx",
+        "issue": "Horizontal overflow on desktop at 1440px viewport. document.scrollWidth=1546 vs clientWidth=1440 (~106px overflow). Affects EVERY page that renders the navbar (all 11 public pages + admin dashboard). Offending element: <div class='hidden lg:flex items-center gap-2 xl:gap-3 shrink-0'> (right=1546,left=982). The 'Demander une livraison' CTA button is rendered beyond the right viewport edge (left=1341, right=1546). Root cause: combination of full nav links (Accueil, Comment ça marche, Services & Tarifs, FAQ, À propos, Contact, Devenir partenaire) + Connexion + Demander CTA all forced to one row by `shrink-0` and `whitespace-nowrap`. The fix added in this iteration to prevent wrapping has caused overflow instead.",
+        "selector": "nav .hidden.lg\\:flex.items-center.gap-2.xl\\:gap-3.shrink-0",
+        "priority": "HIGH"
+      },
+      {
+        "component": "Footer.jsx",
+        "issue": "Three footer social icon links have empty text and href='#' (no destination). Click leads nowhere. Either populate hrefs or hide social icons until ready.",
+        "selector": "footer a[href='#']",
+        "priority": "LOW"
+      },
+      {
+        "component": "Login toast / branding",
+        "issue": "On admin login a toast still shows 'Bienvenue, Administrateur PLB !' — should read 'GoLiv' for consistency with rebrand. Minor branding leftover.",
+        "selector": "toast notification post-login",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Desktop navbar (≥lg breakpoint, <1546px)",
+        "issues": ["Right-side CTA button is partially clipped by viewport on common 1366/1440 desktop widths. Consider hiding CTA on lg breakpoint and showing only at xl, or reducing nav-link gap, or shrinking 'Devenir partenaire' dropdown padding."]
+      },
+      {
+        "screen": "Review request pages list",
+        "issues": ["Review request lists '/feedback' as a public route, but the actual implemented route is '/donner-avis' (Donnez votre avis). '/feedback' returns 'No routes matched location' (router 404, blank h1). Footer correctly uses '/donner-avis'. Either add '/feedback' as alias or correct the documentation."]
+      }
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "HIGH: Fix navbar overflow at 1440px desktop. Recommended: change CTA to hidden lg:hidden xl:inline-flex (show only ≥xl/1280), OR reduce gap between nav links from gap-6 to gap-4, OR drop 'whitespace-nowrap' on items where wrapping is acceptable. Verify scrollWidth ≤ clientWidth at 1280, 1366, 1440px.",
+    "LOW: Either implement social media links in Footer or remove the placeholder href='#' icons.",
+    "LOW: Replace 'Administrateur PLB' login toast text with 'Administrateur GoLiv' in Login flow / toast message.",
+    "DOC: Confirm intended route for feedback page — update review checklist to '/donner-avis' OR add '/feedback' as alias route in App.js."
+  ],
+  "critical_code_review_comments": [
+    "Navbar fix using `shrink-0 whitespace-nowrap` is too aggressive — it solved wrapping by causing horizontal overflow instead. Need a responsive collapse strategy (e.g., hide secondary CTA below xl breakpoint, or move 'Connexion' into a compact icon-only button at lg).",
+    "Hero typography is excellent: h1 = 60px bold, eyebrow = sky-500 uppercase tracked. The App.css import fix is clearly visible across all pages (Vos livraisons simplifiées, À propos, Services, etc).",
+    "Mobile (375px) and tablet (768px) show no horizontal overflow on any tested public page — responsive utility classes work correctly.",
+    "Hamburger menu (data-testid='mobile-menu-toggle') opens to show all 31 navigation links — works reliably.",
+    "Tracking section uses data-testid='tracking-input' and data-testid='tracking-submit-btn' — properly testable."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "85% (10/11 public pages render with hero/eyebrow correctly; navbar overflow is the single recurring HIGH issue)"},
+  "test_credentials": "admin@plb.bj / plb2024 — works (redirects to /admin with welcome toast). /app/memory/test_credentials.md does NOT exist; recommend creating it.",
+  "seed_data_creation": "None. Used existing seeded admin only.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "After main agent fixes the navbar overflow, re-run the desktop 1440 overflow check on all public pages: `document.documentElement.scrollWidth > document.documentElement.clientWidth`. Should be false everywhere. Mobile/tablet/hero typography/login/tracking are all confirmed working — no need to re-test those. The /feedback route is actually /donner-avis (works fine via footer). Tracking input testid='tracking-input', submit testid='tracking-submit-btn' (label 'Rechercher'). Mobile menu testid='mobile-menu-toggle'.",
+  "rca of the issue": "DESKTOP NAVBAR OVERFLOW RCA — Reproduction: viewport 1440x900 → goto / → measure document.scrollWidth (=1546) vs clientWidth (=1440). The offender is `nav > div.hidden.lg:flex.items-center.gap-2.xl:gap-3.shrink-0` which contains Connexion + 'Demander une livraison' buttons; combined with the full nav-links group on the left, total content width = 1546px. Cause: developer added `shrink-0` and `whitespace-nowrap` to prevent wrapping (per review_request notes), but at lg (1024) ≤ width < xl (1280) and at common 1366/1440 widths the content simply exceeds available space. Mitigation options: (a) Hide CTA on lg breakpoint: change 'Demander une livraison' Link from `inline-flex` to `hidden xl:inline-flex`. (b) Reduce gap from gap-6 to gap-4 on nav link list. (c) Replace 'Devenir partenaire' dropdown label with shorter 'Partenaire'. Option (a) is the cleanest since CTA is duplicated in the hero anyway."
+}

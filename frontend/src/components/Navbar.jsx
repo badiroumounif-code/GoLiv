@@ -58,11 +58,11 @@ export default function Navbar() {
       <div className="container-custom">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2" data-testid="logo-link">
-            <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-2 shrink-0" data-testid="logo-link">
+            <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center shrink-0">
               <Truck className="w-6 h-6 text-white" />
             </div>
-            <span className="font-heading font-bold text-xl text-slate-900">
+            <span className="font-heading font-bold text-xl text-slate-900 whitespace-nowrap">
               GoLiv Logistique
             </span>
           </Link>
@@ -73,7 +73,7 @@ export default function Navbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-3 xl:px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
                   isActive(link.path)
                     ? "bg-sky-50 text-sky-600"
                     : "text-slate-600 hover:text-sky-600 hover:bg-sky-50/50"
@@ -86,10 +86,10 @@ export default function Navbar() {
           </nav>
 
           {/* Desktop CTA Buttons */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-slate-600 rounded-full" data-testid="partner-dropdown">
+                <Button variant="ghost" className="text-slate-600 rounded-full whitespace-nowrap" data-testid="partner-dropdown">
                   Devenir partenaire
                   <ChevronDown className="ml-1 w-4 h-4" />
                 </Button>
@@ -145,7 +145,7 @@ export default function Navbar() {
             )}
             
             <Link to="/demande-livraison">
-              <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6" data-testid="request-delivery-btn">
+              <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-5 xl:px-6 whitespace-nowrap" data-testid="request-delivery-btn">
                 Demander une livraison
               </Button>
             </Link>

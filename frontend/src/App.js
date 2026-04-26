@@ -16,6 +16,7 @@ import LoginPage from "./pages/LoginPage";
 import RiderDashboard from "./pages/RiderDashboard";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import FAQ from "./pages/FAQ";
+import "./App.css";
 
 function App() {
   return (

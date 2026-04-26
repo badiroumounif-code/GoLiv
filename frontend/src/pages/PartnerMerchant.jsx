@@ -109,11 +109,11 @@ export default function PartnerMerchant() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Partenariat</span>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-4">
+            <span className="eyebrow-label">Partenariat</span>
+            <h1 className="heading-hero mt-3 mb-5">
               Devenir commerçant partenaire
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="body-lead">
               Rejoignez notre réseau de commerçants partenaires et bénéficiez de tarifs préférentiels 
               pour la livraison de vos produits.
             </p>
@@ -122,17 +122,17 @@ export default function PartnerMerchant() {
       </section>
 
       {/* Benefits */}
-      <section className="py-12 bg-white">
+      <section className="section-padding-sm bg-white">
         <div className="container-custom">
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 max-w-5xl mx-auto">
             {[
               { title: "Tarifs préférentiels", desc: "Jusqu'à 20% de réduction sur vos livraisons" },
               { title: "Service prioritaire", desc: "Vos livraisons traitées en priorité" },
               { title: "Facturation mensuelle", desc: "Simplifiez votre gestion avec une facture unique" }
             ].map((benefit, index) => (
               <div key={index} className="text-center p-4">
-                <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                <h3 className="font-semibold text-slate-900">{benefit.title}</h3>
+                <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-slate-900 mb-1">{benefit.title}</h3>
                 <p className="text-sm text-slate-600">{benefit.desc}</p>
               </div>
             ))}

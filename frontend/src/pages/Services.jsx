@@ -81,11 +81,11 @@ export default function Services() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Nos offres</span>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-4">
+            <span className="eyebrow-label">Nos offres</span>
+            <h1 className="heading-hero mt-3 mb-5">
               Services & Tarifs
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="body-lead">
               Des solutions de livraison adaptées à tous vos besoins, avec des tarifs transparents et compétitifs.
             </p>
           </motion.div>
@@ -99,15 +99,15 @@ export default function Services() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-12 md:mb-16 max-w-2xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Types de colis</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
+            <span className="eyebrow-label">Types de colis</span>
+            <h2 className="heading-section mt-3">
               Nous transportons tout type de colis
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
             {packageTypes.map((type, index) => (
               <motion.div
                 key={index}
@@ -115,13 +115,13 @@ export default function Services() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-6 border border-slate-100 shadow-soft hover:shadow-hover transition-shadow"
+                className="feature-card"
                 data-testid={`package-type-${index}`}
               >
                 <div className="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center text-sky-500 mb-4">
                   {type.icon}
                 </div>
-                <h3 className="font-heading font-semibold text-lg text-slate-900 mb-1">
+                <h3 className="heading-card mb-1">
                   {type.name}
                 </h3>
                 <p className="text-slate-600 text-sm mb-2">{type.description}</p>
@@ -139,15 +139,15 @@ export default function Services() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-12 md:mb-16 max-w-2xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Délais</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
+            <span className="eyebrow-label">Délais</span>
+            <h2 className="heading-section mt-3">
               Choisissez votre niveau d&apos;urgence
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 max-w-5xl mx-auto">
             {urgencyLevels.map((level, index) => (
               <motion.div
                 key={index}
@@ -155,7 +155,7 @@ export default function Services() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-6 border border-slate-100 shadow-soft text-center"
+                className="feature-card text-center"
                 data-testid={`urgency-level-${index}`}
               >
                 <div className={`w-16 h-16 ${level.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
@@ -179,13 +179,13 @@ export default function Services() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-12 md:mb-16 max-w-2xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Grille tarifaire</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
+            <span className="eyebrow-label">Grille tarifaire</span>
+            <h2 className="heading-section mt-3">
               Tarifs indicatifs
             </h2>
-            <p className="text-slate-600 mt-2">Tarifs en FCFA, variables selon le poids et la taille du colis</p>
+            <p className="text-slate-600 mt-3">Tarifs en FCFA, variables selon le poids et la taille du colis</p>
           </motion.div>
 
           <motion.div
@@ -235,14 +235,14 @@ export default function Services() {
       {/* What's Included */}
       <section className="section-padding bg-slate-50">
         <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Inclus</span>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-6">
+              <span className="eyebrow-label">Inclus</span>
+              <h2 className="heading-section mt-3 mb-6">
                 Ce qui est inclus dans nos services
               </h2>
               <ul className="space-y-4">

@@ -211,19 +211,19 @@ export default function RiderDashboard() {
     <div className="min-h-screen bg-slate-50" data-testid="rider-dashboard">
       {/* Header */}
       <div className="bg-gradient-to-br from-sky-500 to-sky-600 text-white">
-        <div className="container-custom py-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="container-custom py-8 md:py-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
             <div>
-              <p className="text-sky-100 text-sm mb-1">Espace Livreur</p>
-              <h1 className="text-2xl md:text-3xl font-bold">
+              <p className="text-sky-100 text-sm mb-1.5 uppercase tracking-wider font-medium">Espace Livreur</p>
+              <h1 className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
                 Bonjour, {profile?.prenom || user?.nom} !
               </h1>
-              <p className="text-sky-100 mt-1 flex items-center gap-2">
+              <p className="text-sky-100 mt-2 flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
                 Zone: {profile?.zone_couverture}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Button
                 onClick={fetchData}
                 variant="secondary"
@@ -247,10 +247,10 @@ export default function RiderDashboard() {
         </div>
       </div>
 
-      <div className="container-custom py-8">
+      <div className="container-custom py-8 md:py-10">
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-8 md:mb-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

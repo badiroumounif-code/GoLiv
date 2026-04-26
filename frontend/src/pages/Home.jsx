@@ -98,44 +98,44 @@ export default function Home() {
   return (
     <div className="overflow-hidden" data-testid="home-page">
       {/* Hero Section */}
-      <section className="relative hero-pattern min-h-[90vh] flex items-center">
+      <section className="relative hero-pattern min-h-[88vh] flex items-center py-16 md:py-20">
         <div className="absolute inset-0 overflow-hidden">
           <div className="gradient-blob w-96 h-96 bg-sky-400 top-20 -left-20"></div>
           <div className="gradient-blob w-80 h-80 bg-sky-300 bottom-20 right-10"></div>
         </div>
         
         <div className="container-custom relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="space-y-6"
+              className="space-y-6 md:space-y-7"
             >
               <span className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 text-sky-600 rounded-full text-sm font-medium">
                 <Truck className="w-4 h-4" />
                 Service de livraison au Bénin
               </span>
               
-              <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight">
-                Vos livraisons,<br />
+              <h1 className="heading-hero">
+                Vos livraisons,{" "}
                 <span className="text-sky-500">simplifiées</span>
               </h1>
               
-              <p className="text-lg text-slate-600 max-w-lg leading-relaxed">
+              <p className="body-lead max-w-lg">
                 GoLiv Logistique est votre partenaire de confiance pour la livraison de colis à Cotonou, 
                 Porto-Novo et Calavi. Rapide, fiable et à votre service.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/demande-livraison">
-                  <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all" data-testid="hero-cta-btn">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+                <Link to="/demande-livraison" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto bg-sky-500 hover:bg-sky-600 text-white rounded-full px-8 py-6 text-base md:text-lg shadow-lg hover:shadow-xl transition-all" data-testid="hero-cta-btn">
                     Demander une livraison
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
-                <Link to="/comment-ca-marche">
-                  <Button variant="outline" className="rounded-full px-8 py-6 text-lg border-slate-200 hover:bg-slate-50" data-testid="hero-secondary-btn">
+                <Link to="/comment-ca-marche" className="w-full sm:w-auto">
+                  <Button variant="outline" className="w-full sm:w-auto rounded-full px-8 py-6 text-base md:text-lg border-slate-200 hover:bg-slate-50" data-testid="hero-secondary-btn">
                     Comment ça marche
                   </Button>
                 </Link>
@@ -196,13 +196,13 @@ export default function Home() {
       </section>
 
       {/* Tracking Section */}
-      <section className="py-12 bg-gradient-to-br from-sky-500 to-sky-600" data-testid="tracking-section">
+      <section className="py-14 md:py-16 bg-gradient-to-br from-sky-500 to-sky-600" data-testid="tracking-section">
         <div className="container-custom">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 font-heading tracking-tight">
               Suivez votre colis
             </h2>
-            <p className="text-sky-100 mb-6">
+            <p className="text-sky-100 mb-6 md:mb-8 text-base md:text-lg">
               Entrez votre numéro de suivi pour connaître l'état de votre livraison
             </p>
             
@@ -298,14 +298,14 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 md:py-20 bg-slate-50">
         <div className="container-custom">
           <motion.div
             variants={stagger}
             initial="initial"
             whileInView="animate"
             viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
           >
             {stats.map((stat, index) => (
               <motion.div
@@ -314,7 +314,7 @@ export default function Home() {
                 className="text-center"
               >
                 <p className="stat-number">{stat.number}</p>
-                <p className="text-slate-600 mt-1">{stat.label}</p>
+                <p className="text-sm md:text-base text-slate-600 mt-2">{stat.label}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -328,10 +328,10 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-12 md:mb-16 max-w-2xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Nos avantages</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
+            <span className="eyebrow-label">Nos avantages</span>
+            <h2 className="heading-section mt-3">
               Pourquoi choisir GoLiv Logistique ?
             </h2>
           </motion.div>
@@ -341,7 +341,7 @@ export default function Home() {
             initial="initial"
             whileInView="animate"
             viewport={{ once: true }}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6"
           >
             {features.map((feature, index) => (
               <motion.div
@@ -368,17 +368,17 @@ export default function Home() {
       {/* Zones Section */}
       <section className="section-padding bg-slate-50">
         <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Couverture</span>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4">
+              <span className="eyebrow-label">Couverture</span>
+              <h2 className="heading-section mt-3 mb-5">
                 Zones de livraison
               </h2>
-              <p className="text-slate-600 mb-6 leading-relaxed">
+              <p className="body-lead mb-6">
                 Nous assurons la livraison de vos colis dans les principales villes et quartiers du Bénin. 
                 Notre réseau s&apos;étend continuellement pour mieux vous servir.
               </p>
@@ -391,7 +391,7 @@ export default function Home() {
                 ))}
               </div>
               <Link to="/demande-livraison">
-                <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6">
+                <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-6 py-5">
                   Commander maintenant
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
@@ -407,7 +407,7 @@ export default function Home() {
               <img
                 src="https://images.unsplash.com/photo-1701943896527-334158c81021?w=800"
                 alt="Livraison de colis"
-                className="w-full h-80 object-cover rounded-3xl"
+                className="w-full h-72 md:h-[420px] object-cover rounded-3xl shadow-soft"
               />
             </motion.div>
           </div>
@@ -415,30 +415,30 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="section-padding">
+      <section className="section-padding-sm">
         <div className="container-custom">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-sky-500 rounded-3xl p-8 md:p-12 text-center text-white relative overflow-hidden"
+            className="bg-sky-500 rounded-3xl p-8 md:p-12 lg:p-16 text-center text-white relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-sky-400 to-sky-600"></div>
             <div className="relative z-10">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="font-heading text-3xl md:text-4xl lg:text-[2.5rem] font-bold mb-4 tracking-tight">
                 Prêt à expédier ?
               </h2>
-              <p className="text-sky-100 max-w-2xl mx-auto mb-8">
+              <p className="text-sky-100 text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
                 Faites confiance à GoLiv Logistique pour vos livraisons. Simple, rapide et fiable.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/demande-livraison">
-                  <Button className="bg-white text-sky-600 hover:bg-sky-50 rounded-full px-8 py-6 text-lg font-semibold" data-testid="cta-delivery-btn">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                <Link to="/demande-livraison" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto bg-white text-sky-600 hover:bg-sky-50 rounded-full px-8 py-6 text-base md:text-lg font-semibold shadow-lg" data-testid="cta-delivery-btn">
                     Demander une livraison
                   </Button>
                 </Link>
-                <Link to="/devenir-partenaire/commercant">
-                  <Button variant="outline" className="border-white text-white hover:bg-white/10 rounded-full px-8 py-6 text-lg" data-testid="cta-partner-btn">
+                <Link to="/devenir-partenaire/commercant" className="w-full sm:w-auto">
+                  <Button variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white/10 rounded-full px-8 py-6 text-base md:text-lg" data-testid="cta-partner-btn">
                     Devenir partenaire
                   </Button>
                 </Link>
@@ -455,15 +455,15 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-12 md:mb-16 max-w-2xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Témoignages</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
+            <span className="eyebrow-label">Témoignages</span>
+            <h2 className="heading-section mt-3">
               Ce que disent nos clients
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {[
               {
                 name: "Aïcha K.",

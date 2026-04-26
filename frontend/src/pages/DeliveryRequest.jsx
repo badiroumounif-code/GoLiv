@@ -226,11 +226,11 @@ export default function DeliveryRequest() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Nouveau</span>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-4">
+            <span className="eyebrow-label">Nouveau</span>
+            <h1 className="heading-hero mt-3 mb-5">
               Demander une livraison
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="body-lead">
               Remplissez ce formulaire pour demander une livraison. Notre équipe vous contactera 
               rapidement pour confirmer les détails.
             </p>

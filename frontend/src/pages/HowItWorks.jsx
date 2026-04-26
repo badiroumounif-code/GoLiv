@@ -60,11 +60,11 @@ export default function HowItWorks() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Processus</span>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-4">
+            <span className="eyebrow-label">Processus</span>
+            <h1 className="heading-hero mt-3 mb-5">
               Comment ça marche ?
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="body-lead">
               En quelques étapes simples, faites livrer vos colis à travers Cotonou, Porto-Novo et Calavi. 
               Notre processus est conçu pour être rapide et sans stress.
             </p>
@@ -144,10 +144,10 @@ export default function HowItWorks() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-12 md:mb-16 max-w-2xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">FAQ</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-slate-900 mt-2">
+            <span className="eyebrow-label">FAQ</span>
+            <h2 className="heading-section mt-3">
               Questions fréquentes
             </h2>
           </motion.div>

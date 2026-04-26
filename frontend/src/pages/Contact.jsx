@@ -77,11 +77,11 @@ export default function Contact() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="text-sky-500 font-medium text-sm uppercase tracking-wider">Contact</span>
-            <h1 className="font-heading text-4xl md:text-5xl font-bold text-slate-900 mt-2 mb-4">
+            <span className="eyebrow-label">Contact</span>
+            <h1 className="heading-hero mt-3 mb-5">
               Contactez-nous
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed">
+            <p className="body-lead">
               Une question ? Un besoin particulier ? N&apos;hésitez pas à nous contacter. 
               Notre équipe est à votre disposition.
             </p>
@@ -92,7 +92,7 @@ export default function Contact() {
       {/* Contact Section */}
       <section className="section-padding">
         <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-12 lg:gap-16">
             {/* Contact Info */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
