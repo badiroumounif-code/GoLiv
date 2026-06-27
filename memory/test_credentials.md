@@ -15,9 +15,15 @@
 - **Password:** `PLB7514` (legacy auto-generated; kept for backward compat)
 - **Dashboard:** `/espace-livreur`
 
+## Google OAuth Users
+- New Google OAuth users are automatically created as **merchants** (role: `merchant`)
+- Google users have `auth_provider: "google"` and no password (cannot use email/password login)
+- Existing users can link their account by logging in with the same email via Google
+- Default dashboard for Google users: `/espace-commercant`
+
 ## How to seed a fresh admin
 ```bash
-curl -X POST "$REACT_APP_BACKEND_URL/api/auth/init-admin"
+curl -X POST "$REACT_APP_BACKEND_URL/api/auth/init-admin?password=plb2024"
 ```
 
 ## API base URL

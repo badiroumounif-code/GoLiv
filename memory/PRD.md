@@ -87,8 +87,29 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 - Hero typography upgraded across all pages: `text-4xl sm:text-5xl lg:text-6xl` with tight tracking
 - Eyebrow labels: uppercase, sky-500, tracked spacing for stronger visual hierarchy
 - Card hover lift: `-translate-y-1` on hover with shadow transition
-- Navbar: `whitespace-nowrap` + `shrink-0` to prevent text wrapping; CTA hidden below `xl` to prevent overflow
+- Navbar: `whitespace-nowrap` + `shrink-0` to prevent text wrapping; CTA hidden below `2xl` to prevent overflow at 1440px
 - Dashboards (Admin, Merchant, Rider): bigger H1, uppercase eyebrow tag, increased section padding `py-8 md:py-10`, gap-4 md:gap-5
+
+### Phase 8 - In-App Notifications ✅ (December 2025)
+- NotificationBell component with badge count
+- Real-time notification polling (15s interval)
+- Notification types: delivery assigned, status changed, new delivery request
+- Mark all as read functionality
+- Per-user notification filtering
+
+### Phase 9 - Google OAuth Integration ✅ (December 2025)
+- **Sign in with Google** button on login page using Emergent-managed Google Auth
+- Backend endpoint `/api/auth/google/session` to exchange session_id for JWT
+- New users created via Google OAuth are assigned `merchant` role by default
+- Stores `auth_provider: "google"` and user's Google profile picture
+- AuthCallback component handles OAuth redirect flow
+- Compatible with existing JWT-based auth system
+
+### Phase 9.1 - CSV Export Bug Fix ✅ (December 2025)
+- Fixed 500 errors on CSV exports (delivery-requests, riders, merchants)
+- Root cause: `csv.DictWriter` using `items[0].keys()` failed with varying document schemas
+- Solution: Explicit header lists with `extrasaction='ignore'`
+- All 4 CSV exports now return 200 with proper headers
 
 ---
 
@@ -119,6 +140,7 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 - `POST /api/auth/login`
 - `POST /api/auth/register`
 - `GET /api/auth/me`
+- `POST /api/auth/google/session` - Exchange Google OAuth session_id for JWT
 
 ### Admin
 - `GET/POST/PATCH/DELETE /api/admin/zones` - Zone management
@@ -146,6 +168,9 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 - [x] FAQ redesign
 - [x] PLB → GoLiv rebrand
 - [x] UI/Layout improvements (typography, spacing, mobile responsiveness)
+- [x] In-app notifications (bell icon, polling, mark as read)
+- [x] Google OAuth integration (Emergent-managed)
+- [x] CSV export bug fix (explicit headers + extrasaction='ignore')
 
 ### P1 - Next Priority (refactoring + features)
 - [ ] Refactor `server.py` (~1800 lines) into routes/auth.py, routes/deliveries.py, routes/admin.py, models.py
@@ -165,6 +190,9 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 
 ## Testing
 
-- Backend: 42/42 tests passed (`/app/backend/tests/`)
-- Frontend: tested via testing_agent_v3_fork (iteration_4) — UI overhaul verified, no overflow at 1440px after navbar fix
-- Test files: `test_tracking_zones_financial.py`, `test_auth.py`
+- Backend: 66+ tests passed across multiple test files (`/app/backend/tests/`)
+  - `test_google_auth_and_exports.py` (11 tests) - Google Auth + CSV exports
+  - `test_notifications_exports.py` (16 tests) - Notifications + finances CSV
+  - `test_tracking_zones_financial.py`, `test_auth.py`
+- Frontend: tested via testing_agent_v3_fork (iteration_6) — Google OAuth button + navbar overflow fix verified
+- Test reports: `/app/test_reports/iteration_6.json`

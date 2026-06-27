@@ -147,7 +147,8 @@ export default function Navbar() {
               </Link>
             )}
             
-            <Link to="/demande-livraison">
+            {/* CTA visible only at 2xl (1536px+) to prevent overflow */}
+            <Link to="/demande-livraison" className="hidden 2xl:inline-flex">
               <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-5 whitespace-nowrap" data-testid="request-delivery-btn">
                 Demander une livraison
               </Button>
