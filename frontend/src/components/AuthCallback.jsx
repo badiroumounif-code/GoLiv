@@ -64,7 +64,6 @@ export default function AuthCallback() {
             navigate("/", { replace: true, state: { user: data.user } });
         }
       } catch (error) {
-        console.error("Google auth error:", error);
         toast.error(error.message || "Erreur lors de la connexion Google");
         navigate("/connexion", { replace: true });
       }

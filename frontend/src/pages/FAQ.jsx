@@ -239,13 +239,13 @@ export default function FAQ() {
                     <h2 className="text-xl font-semibold text-slate-900">{category.title}</h2>
                   </div>
                   <div className="space-y-3">
-                    {category.questions.map((item, index) => (
+                    {category.questions.map((item, qIndex) => (
                       <FAQItem
-                        key={index}
+                        key={`${category.id}-${qIndex}`}
                         question={item.question}
                         answer={item.answer}
-                        isOpen={openItems[`${category.id}-${index}`]}
-                        onClick={() => toggleItem(category.id, index)}
+                        isOpen={openItems[`${category.id}-${qIndex}`]}
+                        onClick={() => toggleItem(category.id, qIndex)}
                       />
                     ))}
                   </div>

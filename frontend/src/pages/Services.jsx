@@ -110,7 +110,7 @@ export default function Services() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
             {packageTypes.map((type, index) => (
               <motion.div
-                key={index}
+                key={type.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -150,7 +150,7 @@ export default function Services() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 max-w-5xl mx-auto">
             {urgencyLevels.map((level, index) => (
               <motion.div
-                key={index}
+                key={level.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -204,8 +204,8 @@ export default function Services() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pricingZones.map((zone, index) => (
-                    <tr key={index} className="border-t border-slate-100">
+                  {pricingZones.map((zone) => (
+                    <tr key={`${zone.from}-${zone.to}`} className="border-t border-slate-100">
                       <td className="px-6 py-4 text-slate-700">
                         {zone.from} → {zone.to}
                       </td>
@@ -246,8 +246,8 @@ export default function Services() {
                 Ce qui est inclus dans nos services
               </h2>
               <ul className="space-y-4">
-                {included.map((item, index) => (
-                  <li key={index} className="flex items-start gap-3">
+                {included.map((item) => (
+                  <li key={item} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                     <span className="text-slate-700">{item}</span>
                   </li>

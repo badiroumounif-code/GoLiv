@@ -209,7 +209,6 @@ export default function Admin() {
       setPlatformSettings(settingsRes.data);
       setFinancialStats(financialRes.data);
     } catch (error) {
-      console.error(error);
       if (error.response?.status === 401) {
         handleLogout();
         toast.error("Session expirée");
@@ -556,7 +555,6 @@ export default function Admin() {
       loadAllData();
     } catch (error) {
       toast.error("Erreur lors de la mise à jour");
-      console.error(error);
     } finally {
       setActionLoading(false);
     }
@@ -584,7 +582,6 @@ export default function Admin() {
       loadAllData();
     } catch (error) {
       toast.error(error.response?.data?.detail || "Erreur lors de l'assignation");
-      console.error(error);
     } finally {
       setActionLoading(false);
     }
@@ -604,7 +601,6 @@ export default function Admin() {
       loadAllData();
     } catch (error) {
       toast.error("Erreur lors de la mise à jour");
-      console.error(error);
     }
   };
 
@@ -631,7 +627,6 @@ export default function Admin() {
       loadAllData();
     } catch (error) {
       toast.error(error.response?.data?.detail || "Erreur lors de la suppression");
-      console.error(error);
     } finally {
       setActionLoading(false);
     }

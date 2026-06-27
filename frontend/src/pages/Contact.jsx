@@ -38,7 +38,6 @@ export default function Contact() {
       setFormData({ nom: "", email: "", sujet: "", message: "" });
     } catch (error) {
       toast.error("Erreur lors de l'envoi du message");
-      console.error(error);
     } finally {
       setLoading(false);
     }

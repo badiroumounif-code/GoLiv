@@ -63,7 +63,7 @@ export default function MerchantDashboard() {
           setAvailableZones(await response.json());
         }
       } catch (error) {
-        console.error("Failed to fetch zones:", error);
+        // Silently fail - zones will be empty
       }
     };
     fetchZones();

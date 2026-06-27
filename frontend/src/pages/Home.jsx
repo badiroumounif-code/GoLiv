@@ -307,9 +307,9 @@ export default function Home() {
             viewport={{ once: true }}
             className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
           >
-            {stats.map((stat, index) => (
+            {stats.map((stat) => (
               <motion.div
-                key={index}
+                key={stat.label}
                 variants={fadeInUp}
                 className="text-center"
               >
@@ -345,7 +345,7 @@ export default function Home() {
           >
             {features.map((feature, index) => (
               <motion.div
-                key={index}
+                key={feature.title}
                 variants={fadeInUp}
                 className="feature-card group"
                 data-testid={`feature-card-${index}`}
@@ -482,7 +482,7 @@ export default function Home() {
               }
             ].map((testimonial, index) => (
               <motion.div
-                key={index}
+                key={testimonial.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

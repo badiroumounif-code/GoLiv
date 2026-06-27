@@ -42,7 +42,7 @@ export default function DeliveryRequest() {
         const response = await axios.get(`${API}/zones`);
         setZones(response.data);
       } catch (error) {
-        console.error("Failed to fetch zones:", error);
+        // Silently fail - zones will be empty
       }
     };
     fetchZones();
@@ -138,7 +138,6 @@ export default function DeliveryRequest() {
       toast.success("Demande envoyée avec succès !");
     } catch (error) {
       toast.error("Erreur lors de l'envoi de la demande");
-      console.error(error);
     } finally {
       setLoading(false);
     }

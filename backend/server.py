@@ -1563,7 +1563,7 @@ async def assign_delivery_to_rider(delivery_id: str, data: AssignRider, password
     <p>Connectez-vous à votre espace livreur pour accepter ou refuser cette livraison.</p>
     <p>Cordialement,<br>L'équipe GoLiv Logistique</p>
     """
-    await send_notification_email(f"🚚 Nouvelle livraison assignée", html, rider['email'])
+    await send_notification_email("🚚 Nouvelle livraison assignée", html, rider['email'])
     
     # In-app: notify rider of assignment
     await notify_rider_by_id(

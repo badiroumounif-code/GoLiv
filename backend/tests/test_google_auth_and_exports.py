@@ -26,8 +26,8 @@ def _resolve_base_url():
 
 
 BASE_URL = _resolve_base_url()
-ADMIN_EMAIL = "admin@plb.bj"
-ADMIN_PASSWORD = "plb2024"
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@plb.bj')  # Use env var in production
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'plb2024')  # Use env var in production
 
 
 @pytest.fixture(scope="module")

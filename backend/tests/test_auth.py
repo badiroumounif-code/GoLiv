@@ -40,7 +40,7 @@ class TestAdminLogin:
         })
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"] is True
         assert "token" in data
         assert "user" in data
         assert data["user"]["role"] == "admin"
@@ -83,7 +83,7 @@ class TestUserRegistration:
         })
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"] is True
         assert "token" in data
         assert data["user"]["role"] == "rider"
         assert data["user"]["email"] == unique_email.lower()
@@ -102,7 +102,7 @@ class TestUserRegistration:
         })
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"] is True
         assert "token" in data
         assert data["user"]["role"] == "merchant"
         assert data["user"]["email"] == unique_email.lower()

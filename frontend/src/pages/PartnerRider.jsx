@@ -84,7 +84,6 @@ export default function PartnerRider() {
       toast.success("Candidature envoyée avec succès !");
     } catch (error) {
       toast.error("Erreur lors de l'envoi de votre candidature");
-      console.error(error);
     } finally {
       setLoading(false);
     }

@@ -8,7 +8,7 @@ import os
 import uuid
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
-ADMIN_PASSWORD = "plb2024"
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'plb2024')  # Use env var in production
 
 
 class TestTrackingEndpoint:

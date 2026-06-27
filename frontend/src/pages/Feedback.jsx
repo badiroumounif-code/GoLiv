@@ -44,7 +44,6 @@ export default function Feedback() {
       toast.success("Merci pour votre avis !");
     } catch (error) {
       toast.error("Erreur lors de l'envoi de votre avis");
-      console.error(error);
     } finally {
       setLoading(false);
     }
