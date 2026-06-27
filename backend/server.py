@@ -278,6 +278,16 @@ class DeliveryStatusUpdate(BaseModel):
 class DeliveryNoteUpdate(BaseModel):
     notes: str
 
+class Notification(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    type: str  # "delivery_assigned", "status_changed", "new_delivery_request", "delivery_delivered"
+    title: str
+    message: str
+    link: Optional[str] = None
+    read: bool = False
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
 # ============ AUTH HELPERS ============
 
 def hash_password(password: str) -> str:
@@ -355,6 +365,38 @@ async def send_notification_email(subject: str, html_content: str, to_email: str
     except Exception as e:
         logger.error(f"Failed to send email: {str(e)}")
         return False
+
+# ============ NOTIFICATION HELPERS ============
+
+async def create_notification(user_id: str, type: str, title: str, message: str, link: Optional[str] = None):
+    """Persist an in-app notification for a single user. Silently no-ops on bad input."""
+    if not user_id:
+        return None
+    notif = Notification(user_id=user_id, type=type, title=title, message=message, link=link)
+    try:
+        await db.notifications.insert_one(notif.model_dump())
+        return notif.id
+    except Exception as e:
+        logger.error(f"Failed to create notification: {e}")
+        return None
+
+async def notify_admins(type: str, title: str, message: str, link: Optional[str] = None):
+    """Send a notification to every admin user."""
+    admins = await db.users.find({"role": "admin", "is_active": True}, {"_id": 0, "id": 1}).to_list(50)
+    for a in admins:
+        await create_notification(a["id"], type, title, message, link)
+
+async def notify_rider_by_id(rider_id: str, type: str, title: str, message: str, link: Optional[str] = None):
+    """Resolve the rider's linked user_id then send notification."""
+    rider = await db.riders.find_one({"id": rider_id}, {"_id": 0, "user_id": 1})
+    if rider and rider.get("user_id"):
+        await create_notification(rider["user_id"], type, title, message, link)
+
+async def notify_merchant_by_id(merchant_id: str, type: str, title: str, message: str, link: Optional[str] = None):
+    """Resolve the merchant's linked user_id then send notification."""
+    merchant = await db.merchants.find_one({"id": merchant_id}, {"_id": 0, "user_id": 1})
+    if merchant and merchant.get("user_id"):
+        await create_notification(merchant["user_id"], type, title, message, link)
 
 # ============ AUTH ENDPOINTS ============
 
@@ -630,6 +672,14 @@ async def create_delivery_request(data: DeliveryRequestCreate):
     """
     await send_notification_email(f"🚚 Livraison {delivery.tracking_number} - {delivery.nom}", html)
     
+    # In-app: notify all admins
+    await notify_admins(
+        type="new_delivery_request",
+        title="Nouvelle demande de livraison",
+        message=f"{delivery.nom} • {delivery.zone_enlevement} → {delivery.zone_livraison}",
+        link="/admin"
+    )
+    
     # Return delivery without internal financial data for public
     response = delivery.model_dump()
     # Remove internal fields for public response
@@ -793,6 +843,23 @@ async def rider_accept_delivery(delivery_id: str, user: dict = Depends(get_curre
         {"$set": {"rider_accepted": True, "status": "en_cours"}}
     )
     
+    # In-app: notify merchant and admins that the rider accepted (now en_cours)
+    tracking = delivery.get("tracking_number", "")
+    if delivery.get("merchant_id"):
+        await notify_merchant_by_id(
+            merchant_id=delivery["merchant_id"],
+            type="status_changed",
+            title="Livraison en cours",
+            message=f"{tracking} • Pris en charge par {rider['prenom']}",
+            link="/espace-commercant"
+        )
+    await notify_admins(
+        type="status_changed",
+        title="Livraison en cours",
+        message=f"{tracking} • {rider['prenom']} {rider['nom']}",
+        link="/admin"
+    )
+    
     return {"success": True, "message": "Livraison acceptée"}
 
 @api_router.patch("/rider/deliveries/{delivery_id}/refuse")
@@ -825,6 +892,14 @@ async def rider_refuse_delivery(delivery_id: str, data: DeliveryNoteUpdate, user
     await db.riders.update_one(
         {"id": rider["id"]},
         {"$inc": {"livraisons_en_cours": -1}}
+    )
+    
+    # In-app: notify admins that rider refused (needs reassignment)
+    await notify_admins(
+        type="delivery_refused",
+        title="Livraison refusée par un livreur",
+        message=f"{delivery.get('tracking_number', '')} • {rider['prenom']} {rider['nom']}",
+        link="/admin"
     )
     
     return {"success": True, "message": "Livraison refusée"}
@@ -869,6 +944,31 @@ async def rider_update_delivery_status(delivery_id: str, data: DeliveryStatusUpd
         {"id": delivery_id},
         {"$set": update_data}
     )
+    
+    # In-app: notify merchant and admins on rider status change
+    if old_status != data.status:
+        status_labels = {
+            "en_cours": "En cours",
+            "livre": "Livrée",
+            "echec": "Échec de livraison"
+        }
+        label = status_labels.get(data.status, data.status)
+        tracking = delivery.get("tracking_number", "")
+        
+        if delivery.get("merchant_id"):
+            await notify_merchant_by_id(
+                merchant_id=delivery["merchant_id"],
+                type="delivery_delivered" if data.status == "livre" else "status_changed",
+                title=label,
+                message=f"{tracking} • {delivery.get('zone_livraison', '')}",
+                link="/espace-commercant"
+            )
+        await notify_admins(
+            type="delivery_delivered" if data.status == "livre" else "status_changed",
+            title=label,
+            message=f"{tracking} • {rider['prenom']} {rider['nom']}",
+            link="/admin"
+        )
     
     return {"success": True, "message": f"Statut mis à jour: {data.status}"}
 
@@ -963,6 +1063,14 @@ async def create_merchant_delivery(data: MerchantDeliveryCreate, user: dict = De
     <p>Conservez ce numéro pour suivre votre livraison.</p>
     """
     await send_notification_email(f"📦 Commande {tracking_number} créée", merchant_html, merchant.get('email'))
+    
+    # In-app: notify admins of new merchant order
+    await notify_admins(
+        type="new_delivery_request",
+        title="Nouvelle commande commerçant",
+        message=f"{merchant['nom_entreprise']} • {tracking_number}",
+        link="/admin"
+    )
     
     # Return without internal financial data
     response = delivery.model_dump()
@@ -1359,6 +1467,15 @@ async def assign_delivery_to_rider(delivery_id: str, data: AssignRider, password
     """
     await send_notification_email(f"🚚 Nouvelle livraison assignée", html, rider['email'])
     
+    # In-app: notify rider of assignment
+    await notify_rider_by_id(
+        rider_id=rider['id'],
+        type="delivery_assigned",
+        title="Nouvelle livraison assignée",
+        message=f"{delivery['tracking_number']} • {delivery['zone_enlevement']} → {delivery['zone_livraison']}",
+        link="/espace-livreur"
+    )
+    
     return {"success": True, "message": f"Livraison assignée à {rider['prenom']} {rider['nom']}"}
 
 @api_router.patch("/admin/delivery-requests/{delivery_id}/status")
@@ -1422,6 +1539,35 @@ async def update_delivery_status(delivery_id: str, data: StatusUpdate, password:
         {"id": delivery_id},
         {"$set": update_data}
     )
+    
+    # In-app: notify merchant (if any) and rider (if any) on status change
+    if old_status != new_status:
+        status_labels = {
+            "nouveau": "Nouvelle",
+            "assigne": "Assignée",
+            "en_cours": "En cours",
+            "livre": "Livrée",
+            "annule": "Annulée"
+        }
+        label = status_labels.get(new_status, new_status)
+        tracking = delivery.get("tracking_number", "")
+        
+        if delivery.get("merchant_id"):
+            await notify_merchant_by_id(
+                merchant_id=delivery["merchant_id"],
+                type="status_changed",
+                title=f"Livraison {label.lower()}",
+                message=f"{tracking} • {delivery.get('zone_livraison', '')}",
+                link="/espace-commercant"
+            )
+        if delivery.get("livreur_id"):
+            await notify_rider_by_id(
+                rider_id=delivery["livreur_id"],
+                type="status_changed",
+                title=f"Statut mis à jour: {label}",
+                message=f"{tracking} • {delivery.get('zone_livraison', '')}",
+                link="/espace-livreur"
+            )
     
     return {"success": True, "message": f"Statut mis à jour: {new_status}"}
 
@@ -1780,6 +1926,68 @@ async def init_default_zones(password: str = Query(...)):
     )
     
     return {"success": True, "message": f"{len(default_zones)} zones créées"}
+
+# ============ NOTIFICATIONS ENDPOINTS ============
+
+@api_router.get("/notifications")
+async def list_my_notifications(limit: int = 20, user: dict = Depends(get_current_user)):
+    """Return the current user's latest notifications, newest first."""
+    notifs = await db.notifications.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(min(max(limit, 1), 100)).to_list(100)
+    return notifs
+
+@api_router.get("/notifications/unread-count")
+async def my_unread_count(user: dict = Depends(get_current_user)):
+    count = await db.notifications.count_documents({"user_id": user["id"], "read": False})
+    return {"count": count}
+
+@api_router.patch("/notifications/{notif_id}/read")
+async def mark_notification_read(notif_id: str, user: dict = Depends(get_current_user)):
+    result = await db.notifications.update_one(
+        {"id": notif_id, "user_id": user["id"]},
+        {"$set": {"read": True}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Notification non trouvée")
+    return {"success": True}
+
+@api_router.patch("/notifications/read-all")
+async def mark_all_notifications_read(user: dict = Depends(get_current_user)):
+    result = await db.notifications.update_many(
+        {"user_id": user["id"], "read": False},
+        {"$set": {"read": True}}
+    )
+    return {"success": True, "updated": result.modified_count}
+
+# ============ ADMIN FINANCES CSV EXPORT ============
+
+@api_router.get("/admin/export/finances")
+async def export_finances(password: str = Query(...)):
+    """CSV export of completed (livre) deliveries with financial fields."""
+    if password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Non autorisé")
+    rows = await db.delivery_requests.find(
+        {"status": "livre"},
+        {"_id": 0}
+    ).sort("completed_at", -1).to_list(10000)
+    headers = [
+        "tracking_number", "completed_at", "zone_livraison", "poids",
+        "prix_zone", "supplement_poids", "prix_total", "commission",
+        "paiement_livreur", "livreur_nom", "merchant_nom"
+    ]
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=headers, extrasaction="ignore")
+    writer.writeheader()
+    for r in rows:
+        writer.writerow({h: (r.get(h) if r.get(h) is not None else "") for h in headers})
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=finances.csv"}
+    )
 
 # Include the router in the main app
 app.include_router(api_router)

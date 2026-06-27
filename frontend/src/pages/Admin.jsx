@@ -1980,6 +1980,19 @@ export default function Admin() {
               {/* Financial Summary */}
               {financialStats && (
                 <>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="font-heading text-lg md:text-xl font-semibold text-slate-900">
+                      Résumé financier
+                    </h3>
+                    <Button
+                      onClick={() => handleExport("finances")}
+                      className="bg-sky-500 hover:bg-sky-600 text-white rounded-full"
+                      data-testid="export-finances-btn"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Exporter CSV
+                    </Button>
+                  </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}

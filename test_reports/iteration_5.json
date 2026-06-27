@@ -1,0 +1,54 @@
+{
+  "summary": "Iteration 5 — Full backend + frontend testing of in-app notifications + CSV exports. Wrote pytest suite test_notifications_exports.py (16 tests). All 13 critical tests PASS (notifications CRUD + auth, all event hooks, finances CSV export, tracking regression). 3 pre-existing CSV export endpoints (delivery-requests/riders/merchants) return 500 — marked xfail (NOT a new regression; root cause: csv.DictWriter pulls fieldnames from items[0].keys() but documents have varying schemas). Combined with existing pytest: 55 passed, 3 xfailed. Frontend: NotificationBell renders post-login, panel opens, mark-all-read clears badge, export-finances-btn visible on Finances tab, public delivery POST creates admin notification visible in bell, login toast now correctly says 'Administrateur GoLiv'.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "/api/admin/export/delivery-requests, /api/admin/export/riders, /api/admin/export/merchants",
+        "issue": "Return 500 Internal Server Error. csv.DictWriter uses fieldnames=items[0].keys() but later docs have additional fields (e.g. livraisons_en_cours, user_id, total_commandes). PRE-EXISTING bug — not introduced this iteration, but blocks the admin Livreurs/Commerçants/Livraisons CSV export buttons. Fix: collect union of all keys OR add extrasaction='ignore' with an explicit header list (same pattern used by the new /api/admin/export/finances which works correctly).",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Navbar.jsx",
+        "issue": "Desktop navbar at 1440px still overflows — 'Demander une livraison' CTA is clipped to 'Deman...' at right edge. This is the SAME HIGH issue reported in iteration_4. Addition of NotificationBell pushed the layout further. Recommend hiding the CTA below xl breakpoint OR removing one nav link OR reducing gap.",
+        "selector": "nav .hidden.lg\\:flex.items-center",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_notifications_exports.py",
+    "/app/test_reports/pytest/pytest_notifications_results.xml",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "HIGH: Fix /api/admin/export/{delivery-requests,riders,merchants} csv.DictWriter KeyError. Use union of keys OR explicit header list + extrasaction='ignore' (same pattern as working /api/admin/export/finances).",
+    "HIGH (carried over from iteration_4): Fix navbar overflow at 1440px — 'Demander une livraison' CTA clipped. Hide CTA below xl breakpoint or reduce nav gap."
+  ],
+  "critical_code_review_comments": [
+    "Notification model + helpers (create_notification, notify_admins, notify_rider_by_id, notify_merchant_by_id) are clean and consistent — _id excluded via projection in all reads (lines 1935-1938).",
+    "All 10 notification hooks fire correctly (verified: public delivery creation → admin; admin assign → rider; rider accept → merchant + admins; rider refuse → admins; rider status → merchant + admins; merchant order → admins). Code review confirms hooks at lines 676, 849, 856, 898, 959, 966, 1068, 1471, 1556, 1564.",
+    "/api/admin/export/finances correctly uses extrasaction='ignore' with explicit headers list — this is the right pattern. The pre-existing exports should be refactored to match.",
+    "NotificationBell uses authFetch from AuthContext (good — bearer token wrap centralized), 15s polling, click-outside-to-close, toast on new notification, proper data-testid attributes on every interactive element.",
+    "PATCH /api/notifications/{id}/read correctly enforces user ownership (filter includes user_id), returns 404 for missing/other-user IDs."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_notifications_exports.py (NEW — 16 tests)"
+  ],
+  "success_rate": {
+    "backend": "100% on new features (notifications + finances export). 75% overall on exports — 1 of 4 existing exports work (/feedback only). 55 passed / 3 xfailed across all suites.",
+    "frontend": "100% — bell, panel, badge, mark-all-read, export-finances-btn all working. Toast message correctly says 'Administrateur GoLiv'."
+  },
+  "test_credentials": "admin@plb.bj / plb2024 — works. /app/memory/test_credentials.md present and accurate.",
+  "seed_data_creation": "Created ~5 TEST_-prefixed delivery requests and 1 TEST_-prefixed rider during testing. Test data is identifiable by 'TEST_' prefix on nom field.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All notification + finances tests in /app/backend/tests/test_notifications_exports.py are stable and idempotent — re-run with REACT_APP_BACKEND_URL set OR the test auto-loads from /app/frontend/.env. Existing CSV exports (delivery-requests/riders/merchants) are marked xfail until the dict-keys bug is fixed; convert xfail to normal assertion after main agent fixes server.py lines 1657-1735 to use explicit headers + extrasaction='ignore'. The navbar overflow HIGH issue from iteration_4 still reproduces at 1440x900 with the bell now adding more pressure on the right side. Auto-generated rider password format is GoLiv<last4digits>, status accept value is 'accepte' (not 'approuve'). Assign endpoint takes query param ?password=plb2024 and body field 'livreur_id' (not 'rider_id').",
+  "rca of the issue": "EXPORT 500 RCA — Reproduction: curl '{BASE}/api/admin/export/riders?password=plb2024' → 500. Backend log shows ValueError: dict contains fields not in fieldnames: 'livraisons_en_cours', 'total_livraisons'. Root cause: server.py uses csv.DictWriter(fieldnames=items[0].keys()) at lines 1666, 1686, 1706, 1726 — but in real data the first document is missing fields that later documents have (e.g. a rider created before livraisons_en_cours counter increments has the field; one created earlier doesn't). When DictWriter.writerows hits a row with extra keys, it raises. Fix: either (a) compute union of keys: fieldnames = list({k for d in items for k in d.keys()}), or (b) use the same pattern as the new finances export — explicit static headers + extrasaction='ignore'. Option (b) is cleaner. NEW EXPORT NOT AFFECTED — /api/admin/export/finances at lines 1966-1990 uses option (b) and works correctly."
+}

@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
 import { useAuth } from "../context/AuthContext";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -108,6 +109,8 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
             
+            {isAuthenticated && <NotificationBell />}
+            
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -151,18 +154,21 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="lg:hidden p-2 rounded-lg hover:bg-slate-100"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            data-testid="mobile-menu-toggle"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-slate-700" />
-            ) : (
-              <Menu className="w-6 h-6 text-slate-700" />
-            )}
-          </button>
+          {/* Mobile: bell + menu button */}
+          <div className="lg:hidden flex items-center gap-1">
+            {isAuthenticated && <NotificationBell />}
+            <button
+              className="p-2 rounded-lg hover:bg-slate-100"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              data-testid="mobile-menu-toggle"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6 text-slate-700" />
+              ) : (
+                <Menu className="w-6 h-6 text-slate-700" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
