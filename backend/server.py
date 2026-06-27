@@ -263,6 +263,9 @@ class ContactMessageCreate(BaseModel):
 class AdminLogin(BaseModel):
     password: str
 
+class GoogleSessionRequest(BaseModel):
+    session_id: str
+
 class StatusUpdate(BaseModel):
     status: str
     reason: Optional[str] = None
@@ -491,6 +494,101 @@ async def get_me(user: dict = Depends(get_current_user)):
         "telephone": user.get("telephone"),
         "linked_id": user.get("linked_id")
     }
+
+# ============ GOOGLE AUTH ENDPOINT ============
+
+@api_router.post("/auth/google/session")
+async def google_auth_session(data: GoogleSessionRequest):
+    """
+    Exchange Google OAuth session_id for user data and JWT token.
+    This endpoint calls Emergent Auth to validate the session and returns a JWT.
+    """
+    import httpx
+    
+    try:
+        # Call Emergent Auth to get user data from session_id
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": data.session_id},
+                timeout=10.0
+            )
+            
+            if response.status_code != 200:
+                logger.error(f"Emergent Auth error: {response.status_code} - {response.text}")
+                raise HTTPException(status_code=401, detail="Session Google invalide")
+            
+            google_data = response.json()
+    except httpx.RequestError as e:
+        logger.error(f"Emergent Auth request failed: {e}")
+        raise HTTPException(status_code=500, detail="Erreur de connexion au service d'authentification")
+    
+    email = google_data.get("email", "").lower()
+    name = google_data.get("name", "")
+    picture = google_data.get("picture", "")
+    
+    if not email:
+        raise HTTPException(status_code=400, detail="Email non fourni par Google")
+    
+    # Check if user exists
+    existing_user = await db.users.find_one({"email": email}, {"_id": 0})
+    
+    if existing_user:
+        # User exists - update picture if changed and return token
+        if picture and existing_user.get("picture") != picture:
+            await db.users.update_one(
+                {"email": email},
+                {"$set": {"picture": picture}}
+            )
+        
+        user = existing_user
+        token = create_token(user["id"], user["role"], user.get("linked_id"))
+        
+        return {
+            "success": True,
+            "token": token,
+            "user": {
+                "id": user["id"],
+                "email": user["email"],
+                "role": user["role"],
+                "nom": user["nom"],
+                "linked_id": user.get("linked_id")
+            }
+        }
+    else:
+        # New user - create as merchant by default (can be changed later)
+        new_user = User(
+            email=email,
+            password_hash="",  # No password for Google auth users
+            role="merchant",   # Default role for new Google users
+            nom=name or email.split("@")[0],
+            telephone="",
+            is_active=True
+        )
+        
+        # Store picture for Google users
+        user_dict = new_user.model_dump()
+        user_dict["picture"] = picture
+        user_dict["auth_provider"] = "google"
+        
+        await db.users.insert_one(user_dict)
+        
+        token = create_token(new_user.id, new_user.role, new_user.linked_id)
+        
+        logger.info(f"New Google user created: {email}")
+        
+        return {
+            "success": True,
+            "token": token,
+            "user": {
+                "id": new_user.id,
+                "email": new_user.email,
+                "role": new_user.role,
+                "nom": new_user.nom,
+                "linked_id": new_user.linked_id
+            },
+            "is_new_user": True
+        }
 
 @api_router.post("/auth/init-admin")
 async def init_admin(password: str = Query(...)):
@@ -1661,10 +1759,20 @@ async def export_delivery_requests(password: str = Query(...)):
     
     items = await db.delivery_requests.find({}, {"_id": 0}).to_list(1000)
     
+    # Explicit headers to handle varying schemas
+    fieldnames = [
+        "id", "tracking_number", "nom", "telephone", "zone_enlevement", "zone_livraison",
+        "zone_livraison_id", "type_colis", "urgence", "poids", "notes", "status",
+        "prix_zone", "supplement_poids", "prix_total", "paiement_livreur", "commission_plateforme",
+        "livreur_id", "livreur_nom", "merchant_id", "merchant_nom", "assigned_at",
+        "completed_at", "delivery_notes", "delivery_proof", "rider_accepted",
+        "last_status_update", "created_at"
+    ]
+    
     output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+    writer.writeheader()
     if items:
-        writer = csv.DictWriter(output, fieldnames=items[0].keys())
-        writer.writeheader()
         writer.writerows(items)
     
     output.seek(0)
@@ -1681,10 +1789,13 @@ async def export_feedback(password: str = Query(...)):
     
     items = await db.feedback.find({}, {"_id": 0}).to_list(1000)
     
+    # Explicit headers to handle varying schemas
+    fieldnames = ["id", "nom", "telephone", "note", "commentaire", "problemes", "created_at"]
+    
     output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+    writer.writeheader()
     if items:
-        writer = csv.DictWriter(output, fieldnames=items[0].keys())
-        writer.writeheader()
         writer.writerows(items)
     
     output.seek(0)
@@ -1701,10 +1812,17 @@ async def export_merchants(password: str = Query(...)):
     
     items = await db.merchants.find({}, {"_id": 0}).to_list(1000)
     
+    # Explicit headers to handle varying schemas
+    fieldnames = [
+        "id", "nom_entreprise", "nom_contact", "telephone", "email", "adresse",
+        "type_produits", "volume_mensuel", "message", "status", "total_commandes",
+        "user_id", "created_at"
+    ]
+    
     output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+    writer.writeheader()
     if items:
-        writer = csv.DictWriter(output, fieldnames=items[0].keys())
-        writer.writeheader()
         writer.writerows(items)
     
     output.seek(0)
@@ -1721,10 +1839,17 @@ async def export_riders(password: str = Query(...)):
     
     items = await db.riders.find({}, {"_id": 0}).to_list(1000)
     
+    # Explicit headers to handle varying schemas
+    fieldnames = [
+        "id", "nom", "prenom", "telephone", "email", "zone_couverture",
+        "type_vehicule", "experience", "disponibilite", "message", "status",
+        "total_livraisons", "livraisons_en_cours", "user_id", "created_at"
+    ]
+    
     output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction='ignore')
+    writer.writeheader()
     if items:
-        writer = csv.DictWriter(output, fieldnames=items[0].keys())
-        writer.writeheader()
         writer.writerows(items)
     
     output.seek(0)

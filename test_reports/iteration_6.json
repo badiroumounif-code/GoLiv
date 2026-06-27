@@ -1,0 +1,46 @@
+{
+  "summary": "Iteration 6 — Full backend + frontend testing of (a) Google Auth endpoint /api/auth/google/session, (b) CSV exports fix, (c) Navbar overflow fix at 1440px. Backend: created /app/backend/tests/test_google_auth_and_exports.py — 11/11 passed (Google auth 401/422 handling, admin JWT login + /me, 4 CSV exports return 200 with correct text/csv content-type, Content-Disposition filenames, and expected header columns). Also re-ran test_notifications_exports.py — previously xfailed CSV exports (delivery-requests/riders/merchants) are now XPASSED, confirming the explicit-headers + extrasaction='ignore' fix works. Frontend: Login page renders 'Continuer avec Google' button with multi-color Google icon SVG (PASS). Admin login (admin@plb.bj / plb2024) successfully redirects to /admin (PASS). HOWEVER, navbar overflow at 1440px is NOT FIXED — 'Demander une livraison' CTA still extends to ctaRight=1496 while viewport is 1440 (56px clipped). The xl:flex change makes the desktop nav appear at >=1280px, but at 1440 there isn't enough room for logo + 7 nav links + bell + admin dropdown + CTA.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Navbar.jsx",
+        "issue": "Navbar still overflows at 1440px viewport — 'Demander une livraison' CTA clipped by ~56px (ctaRight=1496 vs viewport=1440). Changing lg→xl moved the breakpoint to 1280 but the content is still too wide for 1440. Measured: nav has 7 links (Accueil, Comment ça marche, Services & Tarifs, FAQ, À propos, Contact, Partenaire dropdown) + notification bell + Administrateur dropdown + CTA — all visible at 1440 but CTA is clipped on the right edge. Recommend: hide CTA below 2xl (1536px), OR shorten links (e.g. 'Tarifs' instead of 'Services & Tarifs', 'À propos' merged into Partenaire dropdown), OR reduce gap-2/gap-1 spacing, OR show CTA as icon-only button below 2xl.",
+        "selector": "nav .hidden.xl\\:flex.items-center.gap-2.shrink-0 a[href*='demander']",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_google_auth_and_exports.py",
+    "/app/test_reports/pytest/pytest_iteration6_results.xml"
+  ],
+  "action_items": [
+    "HIGH (carried over, NOT fixed by xl breakpoint): Navbar overflow at 1440px — 'Demander une livraison' CTA clipped. xl breakpoint (1280) is too low for this many nav items. Move CTA visibility to 2xl (1536) OR consolidate links OR reduce spacing in /app/frontend/src/components/Navbar.jsx line 90."
+  ],
+  "critical_code_review_comments": [
+    "Google Auth endpoint (server.py L500-591) is clean: uses httpx async client, 10s timeout, properly rejects 401 from Emergent Auth, validates email field presence, creates new users as 'merchant' role by default with auth_provider='google'+picture URL stored — good defaults. One nit: GoogleSessionRequest.session_id has no min_length validator, so empty string passes Pydantic and only fails at Emergent Auth call (still returns 401 cleanly, but adding constr(min_length=1) would be cleaner).",
+    "CSV exports (server.py L1755-1860) — all 4 export endpoints now use the explicit headers + extrasaction='ignore' pattern consistently. This is the right fix and matches the working /api/admin/export/finances pattern. Confirmed: delivery-requests, riders, merchants, feedback all return 200 with correct CSV body parseable by csv.reader.",
+    "AuthCallback flow not directly testable without real Emergent Auth session, but redirect URL construction in LoginPage.jsx L57 uses window.location.origin (dynamic, correct) — not hardcoded.",
+    "Navbar.jsx desktop section at L72/L90 uses 'hidden xl:flex' — correct intent but xl=1280 leaves too little room for the full nav at 1440. The previous iteration_5 report flagged the same overflow; the chosen fix (lg→xl) is insufficient. Either use 2xl OR redesign the nav.",
+    "Login page (LoginPage.jsx L271-287) Google button correctly uses 'Continuer avec Google' label, has data-testid='google-login-btn', shows custom multicolor Google SVG icon, has loading state."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_google_auth_and_exports.py (NEW — 11 tests, all passing)"
+  ],
+  "success_rate": {
+    "backend": "100% (11/11 new tests pass; 3 previously xfailed CSV exports now xpassed in test_notifications_exports.py — confirms fix)",
+    "frontend": "75% — Google button + admin redirect work; navbar overflow at 1440 still HIGH issue"
+  },
+  "test_credentials": "admin@plb.bj / plb2024 — works. /app/memory/test_credentials.md is accurate.",
+  "seed_data_creation": "None this iteration. Some TEST_-prefixed riders/deliveries from iteration_5 remain.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend Google auth + CSV exports are fully working and have regression tests at /app/backend/tests/test_google_auth_and_exports.py (11 tests). The remaining issue is purely a CSS/layout question on Navbar.jsx — verify the fix at 1440x900 viewport and check that ctaRight <= 1440. End-to-end Google OAuth (real flow with valid session_id) cannot be tested without a real Google account routed through https://auth.emergentagent.com — but the 401 path is verified. Pre-existing test_auth.py and test_tracking_zones_financial.py have stale fixtures (33 failed/9 errors) — these are NOT related to this iteration and were already broken before.",
+  "rca of the issue": "Navbar overflow RCA — Reproduction: page.set_viewport_size(1440, 900) → goto / → measure 'Demander une livraison' anchor — ctaRight=1496, navRight=934 (nav element is parent that doesn't expand), overflowing=true. Root cause: Navbar.jsx L90 'hidden xl:flex items-center gap-2 shrink-0' shows the full action group (NotificationBell + Administrateur DropdownMenu + Demander CTA) at >=1280px, but together with the 7 nav links at L72 (also xl:flex with gap-1) and the GoLiv logo, total content width at default text sizes is ~1496px. The header container is max-w-7xl (=1280px) with px-4 (=32px each side), so usable width is 1216px at 1280 viewport but at 1440 the container caps at 1280+padding=1344px effective — still <1496. Fix options: (a) change L90 'hidden xl:flex' → 'hidden 2xl:flex' so CTA only appears at >=1536, (b) remove max-w-7xl on the header and use full viewport width, (c) trim nav link labels."
+}

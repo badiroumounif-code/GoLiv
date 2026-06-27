@@ -68,13 +68,13 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+          {/* Desktop Navigation - hidden below xl to prevent overflow */}
+          <nav className="hidden xl:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-3 xl:px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                className={`px-3 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
                   isActive(link.path)
                     ? "bg-sky-50 text-sky-600"
                     : "text-slate-600 hover:text-sky-600 hover:bg-sky-50/50"
@@ -86,11 +86,11 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Desktop CTA Buttons */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
+          {/* Desktop CTA Buttons - hidden below xl to match nav */}
+          <div className="hidden xl:flex items-center gap-2 shrink-0">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-slate-600 rounded-full whitespace-nowrap px-3 xl:px-4" data-testid="partner-dropdown">
+                <Button variant="ghost" className="text-slate-600 rounded-full whitespace-nowrap px-3" data-testid="partner-dropdown">
                   Partenaire
                   <ChevronDown className="ml-1 w-4 h-4" />
                 </Button>
@@ -114,7 +114,7 @@ export default function Navbar() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="rounded-full px-4" data-testid="user-menu-btn">
+                  <Button variant="outline" className="rounded-full px-3" data-testid="user-menu-btn">
                     <User className="w-4 h-4 mr-2" />
                     {user?.nom?.split(' ')[0] || getRoleLabel()}
                     <ChevronDown className="ml-1 w-4 h-4" />
@@ -140,22 +140,22 @@ export default function Navbar() {
               </DropdownMenu>
             ) : (
               <Link to="/connexion">
-                <Button variant="outline" className="rounded-full px-6" data-testid="login-btn">
+                <Button variant="outline" className="rounded-full px-4" data-testid="login-btn">
                   <User className="w-4 h-4 mr-2" />
                   Connexion
                 </Button>
               </Link>
             )}
             
-            <Link to="/demande-livraison" className="hidden xl:inline-flex">
-              <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-5 xl:px-6 whitespace-nowrap" data-testid="request-delivery-btn">
+            <Link to="/demande-livraison">
+              <Button className="bg-sky-500 hover:bg-sky-600 text-white rounded-full px-5 whitespace-nowrap" data-testid="request-delivery-btn">
                 Demander une livraison
               </Button>
             </Link>
           </div>
 
-          {/* Mobile: bell + menu button */}
-          <div className="lg:hidden flex items-center gap-1">
+          {/* Mobile: bell + menu button - visible below xl */}
+          <div className="xl:hidden flex items-center gap-1">
             {isAuthenticated && <NotificationBell />}
             <button
               className="p-2 rounded-lg hover:bg-slate-100"
@@ -171,9 +171,9 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - visible below xl */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-slate-100 mobile-menu-enter" data-testid="mobile-menu">
+          <div className="xl:hidden py-4 border-t border-slate-100 mobile-menu-enter" data-testid="mobile-menu">
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link

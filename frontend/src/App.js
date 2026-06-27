@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/Layout";
@@ -16,31 +16,47 @@ import LoginPage from "./pages/LoginPage";
 import RiderDashboard from "./pages/RiderDashboard";
 import MerchantDashboard from "./pages/MerchantDashboard";
 import FAQ from "./pages/FAQ";
+import AuthCallback from "./components/AuthCallback";
 import "./App.css";
+
+// Router wrapper to handle Google OAuth callback
+function AppRouter() {
+  const location = useLocation();
+  
+  // CRITICAL: Check URL fragment for session_id synchronously during render
+  // This prevents race conditions by processing OAuth callback FIRST
+  if (location.hash?.includes('session_id=')) {
+    return <AuthCallback />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="comment-ca-marche" element={<HowItWorks />} />
+        <Route path="services" element={<Services />} />
+        <Route path="a-propos" element={<About />} />
+        <Route path="contact" element={<Contact />} />
+        <Route path="faq" element={<FAQ />} />
+        <Route path="demande-livraison" element={<DeliveryRequest />} />
+        <Route path="donner-avis" element={<Feedback />} />
+        <Route path="devenir-partenaire/commercant" element={<PartnerMerchant />} />
+        <Route path="devenir-partenaire/livreur" element={<PartnerRider />} />
+        <Route path="admin" element={<Admin />} />
+        <Route path="connexion" element={<LoginPage />} />
+        <Route path="espace-livreur" element={<RiderDashboard />} />
+        <Route path="espace-commercant" element={<MerchantDashboard />} />
+      </Route>
+    </Routes>
+  );
+}
 
 function App() {
   return (
     <div className="App min-h-screen bg-white">
       <AuthProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="comment-ca-marche" element={<HowItWorks />} />
-              <Route path="services" element={<Services />} />
-              <Route path="a-propos" element={<About />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="faq" element={<FAQ />} />
-              <Route path="demande-livraison" element={<DeliveryRequest />} />
-              <Route path="donner-avis" element={<Feedback />} />
-              <Route path="devenir-partenaire/commercant" element={<PartnerMerchant />} />
-              <Route path="devenir-partenaire/livreur" element={<PartnerRider />} />
-              <Route path="admin" element={<Admin />} />
-              <Route path="connexion" element={<LoginPage />} />
-              <Route path="espace-livreur" element={<RiderDashboard />} />
-              <Route path="espace-commercant" element={<MerchantDashboard />} />
-            </Route>
-          </Routes>
+          <AppRouter />
         </BrowserRouter>
         <Toaster position="top-center" richColors />
       </AuthProvider>
