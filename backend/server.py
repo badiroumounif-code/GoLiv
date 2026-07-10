@@ -133,12 +133,13 @@ class DeliveryRequest(BaseModel):
     zone_livraison_id: Optional[str] = None  # Reference to zone for pricing
     type_colis: str
     urgence: str
-    poids: Optional[float] = None  # Weight in kg
+    poids: Optional[float] = None  # Weight in kg (informational only)
+    forfait: str = "jour"  # "jour" or "nuit" - affects pricing (+20% at night)
     notes: Optional[str] = None
     status: str = "nouveau"
     # Pricing fields
     prix_zone: Optional[int] = None  # Base price from zone
-    supplement_poids: Optional[int] = None  # Weight surcharge
+    supplement_nuit: Optional[int] = None  # Night surcharge (+20%)
     prix_total: Optional[int] = None  # Final price
     paiement_livreur: Optional[int] = None  # Rider payment
     commission_plateforme: Optional[int] = None  # Platform commission
@@ -164,6 +165,7 @@ class DeliveryRequestCreate(BaseModel):
     type_colis: str
     urgence: str
     poids: Optional[float] = None
+    forfait: str = "jour"  # "jour" or "nuit"
     notes: Optional[str] = None
 
 class MerchantDeliveryCreate(BaseModel):
@@ -175,6 +177,7 @@ class MerchantDeliveryCreate(BaseModel):
     type_colis: str
     urgence: str
     poids: Optional[float] = None
+    forfait: str = "jour"  # "jour" or "nuit"
     notes: Optional[str] = None
 
 class Feedback(BaseModel):
@@ -678,8 +681,8 @@ async def track_delivery(tracking_number: str):
 
 # ============ PRICING HELPER ============
 
-async def calculate_delivery_price(zone_id: str, poids: float = None):
-    """Calculate delivery price based on zone and weight"""
+async def calculate_delivery_price(zone_id: str, forfait: str = "jour"):
+    """Calculate delivery price based on zone and day/night pricing"""
     # Get zone
     zone = await db.zones.find_one({"id": zone_id, "is_active": True}, {"_id": 0})
     if not zone:
@@ -689,23 +692,24 @@ async def calculate_delivery_price(zone_id: str, poids: float = None):
     settings = await db.platform_settings.find_one({"id": "platform_settings"}, {"_id": 0})
     if not settings:
         settings = {
-            "poids_seuil": 5.0,
-            "poids_supplement": 500,
             "commission_type": "percentage",
             "commission_value": 15.0
         }
     
     # Base price from zone
     prix_zone = zone.get("prix_base", 0)
-    paiement_livreur = zone.get("paiement_livreur", 0)
+    paiement_livreur_base = zone.get("paiement_livreur", 0)
     
-    # Weight surcharge
-    supplement_poids = 0
-    if poids and poids > settings.get("poids_seuil", 5.0):
-        supplement_poids = settings.get("poids_supplement", 500)
+    # Night surcharge (+20% for both price and rider payment)
+    supplement_nuit = 0
+    supplement_livreur_nuit = 0
+    if forfait == "nuit":
+        supplement_nuit = int(prix_zone * 0.20)
+        supplement_livreur_nuit = int(paiement_livreur_base * 0.20)
     
     # Total price
-    prix_total = prix_zone + supplement_poids
+    prix_total = prix_zone + supplement_nuit
+    paiement_livreur = paiement_livreur_base + supplement_livreur_nuit
     
     # Commission
     if settings.get("commission_type") == "percentage":
@@ -715,7 +719,7 @@ async def calculate_delivery_price(zone_id: str, poids: float = None):
     
     return {
         "prix_zone": prix_zone,
-        "supplement_poids": supplement_poids,
+        "supplement_nuit": supplement_nuit,
         "prix_total": prix_total,
         "paiement_livreur": paiement_livreur,
         "commission_plateforme": commission
@@ -730,13 +734,13 @@ async def create_delivery_request(data: DeliveryRequestCreate):
     # Calculate pricing if zone_id provided
     pricing = None
     if data.zone_livraison_id:
-        pricing = await calculate_delivery_price(data.zone_livraison_id, data.poids)
+        pricing = await calculate_delivery_price(data.zone_livraison_id, data.forfait)
     
     delivery = DeliveryRequest(
         **data.model_dump(),
         tracking_number=tracking_number,
         prix_zone=pricing.get("prix_zone") if pricing else None,
-        supplement_poids=pricing.get("supplement_poids") if pricing else None,
+        supplement_nuit=pricing.get("supplement_nuit") if pricing else None,
         prix_total=pricing.get("prix_total") if pricing else None,
         paiement_livreur=pricing.get("paiement_livreur") if pricing else None,
         commission_plateforme=pricing.get("commission_plateforme") if pricing else None,
@@ -1100,7 +1104,7 @@ async def create_merchant_delivery(data: MerchantDeliveryCreate, user: dict = De
     # Calculate pricing if zone_id provided
     pricing = None
     if data.zone_livraison_id:
-        pricing = await calculate_delivery_price(data.zone_livraison_id, data.poids)
+        pricing = await calculate_delivery_price(data.zone_livraison_id, data.forfait)
     
     delivery = DeliveryRequest(
         tracking_number=tracking_number,
@@ -1112,11 +1116,12 @@ async def create_merchant_delivery(data: MerchantDeliveryCreate, user: dict = De
         type_colis=data.type_colis,
         urgence=data.urgence,
         poids=data.poids,
+        forfait=data.forfait,
         notes=data.notes,
         merchant_id=merchant["id"],
         merchant_nom=merchant["nom_entreprise"],
         prix_zone=pricing.get("prix_zone") if pricing else None,
-        supplement_poids=pricing.get("supplement_poids") if pricing else None,
+        supplement_nuit=pricing.get("supplement_nuit") if pricing else None,
         prix_total=pricing.get("prix_total") if pricing else None,
         paiement_livreur=pricing.get("paiement_livreur") if pricing else None,
         commission_plateforme=pricing.get("commission_plateforme") if pricing else None,
@@ -1711,8 +1716,8 @@ async def export_delivery_requests(admin: dict = Depends(get_admin_user)):
     # Explicit headers to handle varying schemas
     fieldnames = [
         "id", "tracking_number", "nom", "telephone", "zone_enlevement", "zone_livraison",
-        "zone_livraison_id", "type_colis", "urgence", "poids", "notes", "status",
-        "prix_zone", "supplement_poids", "prix_total", "paiement_livreur", "commission_plateforme",
+        "zone_livraison_id", "type_colis", "urgence", "poids", "forfait", "notes", "status",
+        "prix_zone", "supplement_nuit", "prix_total", "paiement_livreur", "commission_plateforme",
         "livreur_id", "livreur_nom", "merchant_id", "merchant_nom", "assigned_at",
         "completed_at", "delivery_notes", "delivery_proof", "rider_accepted",
         "last_status_update", "created_at"
@@ -2013,8 +2018,8 @@ async def export_finances(admin: dict = Depends(get_admin_user)):
         {"_id": 0}
     ).sort("completed_at", -1).to_list(10000)
     headers = [
-        "tracking_number", "completed_at", "zone_livraison", "poids",
-        "prix_zone", "supplement_poids", "prix_total", "commission",
+        "tracking_number", "completed_at", "zone_livraison", "poids", "forfait",
+        "prix_zone", "supplement_nuit", "prix_total", "commission",
         "paiement_livreur", "livreur_nom", "merchant_nom"
     ]
     output = io.StringIO()

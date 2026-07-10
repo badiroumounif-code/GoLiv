@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Package, Truck, CheckCircle, Loader2, Scale, Copy } from "lucide-react";
+import { Package, Truck, CheckCircle, Loader2, Scale, Copy, Sun, Moon } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { Switch } from "../components/ui/switch";
 import { toast } from "sonner";
 import axios from "axios";
 
@@ -32,6 +33,7 @@ export default function DeliveryRequest() {
     type_colis: "",
     urgence: "",
     poids: "",
+    forfait: "jour",
     notes: ""
   });
 
@@ -75,22 +77,22 @@ export default function DeliveryRequest() {
     { value: "urgent", label: "Urgent (2 - 4h)" }
   ];
 
-  // Calculate estimated price when zone or weight changes
+  // Calculate estimated price when zone or forfait changes
   useEffect(() => {
     if (formData.zone_livraison_id) {
       const zone = zones.find(z => z.id === formData.zone_livraison_id);
       if (zone) {
         let price = zone.prix_base;
-        const weight = parseFloat(formData.poids) || 0;
-        if (weight > 5) {
-          price += 500; // Weight surcharge
+        // Night surcharge (+20%)
+        if (formData.forfait === "nuit") {
+          price = Math.round(price * 1.20);
         }
         setEstimatedPrice(price);
       }
     } else {
       setEstimatedPrice(null);
     }
-  }, [formData.zone_livraison_id, formData.poids, zones]);
+  }, [formData.zone_livraison_id, formData.forfait, zones]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -402,7 +404,45 @@ export default function DeliveryRequest() {
                         data-testid="delivery-poids-input"
                       />
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">+500 FCFA si &gt; 5kg</p>
+                    <p className="text-xs text-slate-500 mt-1">Information uniquement</p>
+                  </div>
+                </div>
+
+                {/* Day/Night Pricing Toggle */}
+                <div className="bg-slate-50 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {formData.forfait === "jour" ? (
+                        <Sun className="w-5 h-5 text-amber-500" />
+                      ) : (
+                        <Moon className="w-5 h-5 text-indigo-500" />
+                      )}
+                      <div>
+                        <Label className="text-slate-700 font-medium">
+                          {formData.forfait === "jour" ? "Forfait Jour" : "Forfait Nuit"}
+                        </Label>
+                        <p className="text-xs text-slate-500">
+                          {formData.forfait === "jour" 
+                            ? "Tarif standard (8h - 20h)" 
+                            : "Tarif majoré +20% (20h - 8h)"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm ${formData.forfait === "jour" ? "text-amber-600 font-medium" : "text-slate-400"}`}>
+                        Jour
+                      </span>
+                      <Switch
+                        checked={formData.forfait === "nuit"}
+                        onCheckedChange={(checked) => 
+                          setFormData({ ...formData, forfait: checked ? "nuit" : "jour" })
+                        }
+                        data-testid="forfait-toggle"
+                      />
+                      <span className={`text-sm ${formData.forfait === "nuit" ? "text-indigo-600 font-medium" : "text-slate-400"}`}>
+                        Nuit
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -417,9 +457,9 @@ export default function DeliveryRequest() {
                     <div>
                       <p className="text-sm text-green-600">Prix estimé de la livraison</p>
                       <p className="text-xs text-green-500">
-                        {formData.poids && parseFloat(formData.poids) > 5 
-                          ? `Zone: ${estimatedPrice - 500} FCFA + Supplément poids: 500 FCFA`
-                          : `Zone: ${estimatedPrice} FCFA`
+                        {formData.forfait === "nuit" 
+                          ? `Tarif nuit (+20% inclus)`
+                          : `Tarif jour standard`
                         }
                       </p>
                     </div>

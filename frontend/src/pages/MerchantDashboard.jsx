@@ -4,12 +4,13 @@ import { motion } from "framer-motion";
 import { 
   Package, CheckCircle, Clock, XCircle, MapPin, 
   Phone, User, AlertCircle, RefreshCw, LogOut, TrendingUp,
-  Plus, Download, Search, Building2, MessageSquare, Scale
+  Plus, Download, Search, Building2, MessageSquare, Scale, Sun, Moon
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Switch } from "../components/ui/switch";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 
@@ -37,6 +38,7 @@ export default function MerchantDashboard() {
     type_colis: "petit_colis",
     urgence: "standard",
     poids: "",
+    forfait: "jour",
     notes: ""
   });
 
@@ -75,16 +77,16 @@ export default function MerchantDashboard() {
       const zone = availableZones.find(z => z.id === newDelivery.zone_livraison_id);
       if (zone) {
         let price = zone.prix_base;
-        const weight = parseFloat(newDelivery.poids) || 0;
-        if (weight > 5) {
-          price += 500;
+        // Night surcharge (+20%)
+        if (newDelivery.forfait === "nuit") {
+          price = Math.round(price * 1.20);
         }
         setEstimatedPrice(price);
       }
     } else {
       setEstimatedPrice(null);
     }
-  }, [newDelivery.zone_livraison_id, newDelivery.poids, availableZones]);
+  }, [newDelivery.zone_livraison_id, newDelivery.forfait, availableZones]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -169,6 +171,7 @@ export default function MerchantDashboard() {
           type_colis: "petit_colis",
           urgence: "standard",
           poids: "",
+          forfait: "jour",
           notes: ""
         });
         setEstimatedPrice(null);
@@ -701,10 +704,53 @@ export default function MerchantDashboard() {
                 </div>
               </div>
 
+              {/* Day/Night Pricing Toggle */}
+              <div className="bg-slate-50 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {newDelivery.forfait === "jour" ? (
+                      <Sun className="w-5 h-5 text-amber-500" />
+                    ) : (
+                      <Moon className="w-5 h-5 text-indigo-500" />
+                    )}
+                    <div>
+                      <Label className="text-slate-700 font-medium">
+                        {newDelivery.forfait === "jour" ? "Forfait Jour" : "Forfait Nuit"}
+                      </Label>
+                      <p className="text-xs text-slate-500">
+                        {newDelivery.forfait === "jour" 
+                          ? "Tarif standard (8h - 20h)" 
+                          : "Tarif majoré +20% (20h - 8h)"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm ${newDelivery.forfait === "jour" ? "text-amber-600 font-medium" : "text-slate-400"}`}>
+                      Jour
+                    </span>
+                    <Switch
+                      checked={newDelivery.forfait === "nuit"}
+                      onCheckedChange={(checked) => 
+                        setNewDelivery(prev => ({ ...prev, forfait: checked ? "nuit" : "jour" }))
+                      }
+                      data-testid="merchant-forfait-toggle"
+                    />
+                    <span className={`text-sm ${newDelivery.forfait === "nuit" ? "text-indigo-600 font-medium" : "text-slate-400"}`}>
+                      Nuit
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Estimated Price */}
               {estimatedPrice && (
                 <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center justify-between">
-                  <span className="text-sm text-green-600">Prix estimé</span>
+                  <div>
+                    <span className="text-sm text-green-600">Prix estimé</span>
+                    <p className="text-xs text-green-500">
+                      {newDelivery.forfait === "nuit" ? "Tarif nuit (+20%)" : "Tarif jour"}
+                    </p>
+                  </div>
                   <span className="text-lg font-bold text-green-700">{estimatedPrice.toLocaleString()} FCFA</span>
                 </div>
               )}
