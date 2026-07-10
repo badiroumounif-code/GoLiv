@@ -1,0 +1,43 @@
+{
+  "summary": "Iteration 7 — Validated the SECURITY FIX that migrated all admin routes from `password: str = Query(...)` to JWT Bearer auth via `get_admin_user`. Created /app/backend/tests/test_admin_jwt_security.py (47 parametrized tests) covering: (a) 16 admin GET endpoints return 401/403 without any token AND with the old `?password=plb2024` query bypass, (b) same 16 endpoints return 403 with a non-admin (rider) JWT with a French detail message, (c) 6 critical admin GETs return 200 with an admin JWT, (d) 5 CSV export endpoints return text/csv + Content-Disposition attachment with an admin JWT, (e) full Zone CRUD (POST/PATCH/DELETE) with JWT and no-token rejection, (f) delivery-status PATCH rejects both no-token and legacy `?password=` bypass, (g) financial dashboard loads with JWT, (h) garbage bearer token returns 401. Result: 47/47 passed. Frontend: admin@plb.bj / plb2024 login at /connexion successfully redirects to /admin, plb_token persisted to localStorage, dashboard loads all data (stats 57 orders, 12 riders, 5/5 ratings) with 0 API errors and 0 console errors, Livreurs & Finances tabs navigate cleanly, CSV export button present. Unauthenticated /admin access shows the 'Se connecter' CTA card and makes NO admin API calls — confirming the frontend correctly gates by presence of plb_token/role.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/admin/login", "issue": "Legacy password-only /admin/login endpoint still exists (returns success but issues no token). Not exploitable since all admin data routes now require JWT, but it is now dead code that should be removed or converted to fully JWT-based to avoid confusion in future audits."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_admin_jwt_security.py",
+    "/app/test_reports/pytest/pytest_iteration7_results.xml"
+  ],
+  "action_items": [
+    "OPTIONAL / minor: Remove or refactor the dead POST /api/admin/login endpoint (server.py L1269-1273) — it only checks password against ADMIN_PASSWORD, returns success without issuing a token, and is no longer referenced by the frontend after the migration to /connexion.",
+    "OPTIONAL / carry-over from iteration_6: Navbar CTA overflow at 1440px in /app/frontend/src/components/Navbar.jsx — not part of this security fix but still open."
+  ],
+  "critical_code_review_comments": [
+    "get_admin_user dependency (server.py L334-339) is correctly built on top of get_current_user and returns HTTP 403 with a clear French message when role != admin — verified by 16 parametrized 403 tests.",
+    "All 30+ admin routes in server.py now use `admin: dict = Depends(get_admin_user)` consistently (grep confirmed: 27 occurrences, no remaining `password: str = Query` bypasses).",
+    "Admin.jsx getAuthHeaders() reads token from localStorage('plb_token') and every axios call to /api/admin/* now passes { headers } — no residual `password=` query strings in the frontend (grep confirmed empty).",
+    "CSV export in Admin.jsx handleExport correctly uses responseType:'blob' with Bearer header — download flow verified as authenticated (no password in URL).",
+    "SECURITY REGRESSION GUARD: the test file explicitly asserts that GET /api/admin/* with `?password=plb2024` returns 401/403 (not 200), so any future accidental re-introduction of a password-query bypass will fail CI.",
+    "Minor: POST /api/admin/login (L1269-1273) is now dead — it validates the password but does not issue a token. Recommend removing to reduce attack surface and code confusion."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin_jwt_security.py (NEW — 47 parametrized tests, all passing)"
+  ],
+  "success_rate": {
+    "backend": "100% (47/47 tests pass, covering all 16 admin GET endpoints x 3 auth states + zone CRUD + delivery PATCH + garbage token)",
+    "frontend": "100% (admin login → JWT stored → dashboard loads → tab navigation → no auth-related API errors; unauth /admin correctly shows login CTA with no admin API calls)"
+  },
+  "test_credentials": "admin@plb.bj / plb2024 confirmed working. Rider fixture: attempted badirouadeniyi@gmail.com/PLB7514 first; test file falls back to registering a TEST_rider_jwt_* rider if the seeded rider is missing — so the suite is self-healing.",
+  "seed_data_creation": "Test suite creates one TEST_ZONE_<pid> zone during zone-CRUD test and deletes it in the same test. Possibly creates one TEST_rider_jwt_<pid>@example.com rider user if the legacy rider is missing (kept as needed by parametrized 403 tests).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The security fix is complete and verified. Regression tests live at /app/backend/tests/test_admin_jwt_security.py — re-run with `REACT_APP_BACKEND_URL=<url> pytest backend/tests/test_admin_jwt_security.py -v`. Any future admin route added MUST use Depends(get_admin_user); the test file has ADMIN_GET_ENDPOINTS list that should be extended for new routes. Pre-existing broken suites (test_auth.py, test_tracking_zones_financial.py — flagged in iteration_6) were NOT re-run this iteration and remain unrelated to this fix.",
+  "rca of the issue": "Not a bug — this iteration validated a proactive security fix. Previous behavior (RCA of the vulnerability): admin routes used FastAPI query parameters like `password: str = Query(...)` which caused plaintext admin passwords to appear in (1) browser URL bars, (2) HTTP access logs on the reverse proxy / uvicorn, (3) Referer headers on any outbound link click. Mitigation applied by main agent: introduced get_admin_user JWT dependency + updated frontend Admin.jsx to send Authorization: Bearer <token> from localStorage. Testing confirms: (a) the `?password=` bypass is fully closed (401/403 on every admin GET tested), (b) role check works (rider JWT → 403), (c) valid admin JWT unlocks all admin routes."
+}

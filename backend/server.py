@@ -331,12 +331,12 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     
     return user
 
-async def require_role(roles: List[str]):
-    async def role_checker(user: dict = Depends(get_current_user)):
-        if user["role"] not in roles:
-            raise HTTPException(status_code=403, detail="Accès non autorisé")
-        return user
-    return role_checker
+async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Dependency that ensures the user is authenticated and has admin role"""
+    user = await get_current_user(credentials)
+    if user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
+    return user
 
 # ============ EMAIL HELPER ============
 
@@ -1273,54 +1273,39 @@ async def admin_login(data: AdminLogin):
     raise HTTPException(status_code=401, detail="Mot de passe incorrect")
 
 @api_router.get("/admin/delivery-requests")
-async def get_delivery_requests(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
+async def get_delivery_requests(admin: dict = Depends(get_admin_user)):
     items = await db.delivery_requests.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return items
 
 @api_router.get("/admin/feedback")
-async def get_feedback(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
+async def get_feedback(admin: dict = Depends(get_admin_user)):
     items = await db.feedback.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return items
 
 @api_router.get("/admin/merchants")
-async def get_merchants(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
+async def get_merchants(admin: dict = Depends(get_admin_user)):
     items = await db.merchants.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return items
 
 @api_router.get("/admin/riders")
-async def get_riders(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
+async def get_riders(admin: dict = Depends(get_admin_user)):
     items = await db.riders.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return items
 
 @api_router.get("/admin/contacts")
-async def get_contacts(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
+async def get_contacts(admin: dict = Depends(get_admin_user)):
     items = await db.contact_messages.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return items
 
 @api_router.get("/admin/users")
-async def get_users(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
+async def get_users(admin: dict = Depends(get_admin_user)):
     items = await db.users.find({}, {"_id": 0, "password_hash": 0}).sort("created_at", -1).to_list(1000)
     return items
 
 # ============ STATUS MANAGEMENT ============
 
 @api_router.patch("/admin/merchants/{merchant_id}/status")
-async def update_merchant_status(merchant_id: str, data: StatusUpdate, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def update_merchant_status(merchant_id: str, data: StatusUpdate, admin: dict = Depends(get_admin_user)):
     merchant = await db.merchants.find_one({"id": merchant_id}, {"_id": 0})
     if not merchant:
         raise HTTPException(status_code=404, detail="Commerçant non trouvé")
@@ -1390,10 +1375,7 @@ async def update_merchant_status(merchant_id: str, data: StatusUpdate, password:
     return {"success": True, "message": f"Statut mis à jour: {data.status}"}
 
 @api_router.patch("/admin/riders/{rider_id}/status")
-async def update_rider_status(rider_id: str, data: StatusUpdate, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def update_rider_status(rider_id: str, data: StatusUpdate, admin: dict = Depends(get_admin_user)):
     rider = await db.riders.find_one({"id": rider_id}, {"_id": 0})
     if not rider:
         raise HTTPException(status_code=404, detail="Livreur non trouvé")
@@ -1464,10 +1446,7 @@ async def update_rider_status(rider_id: str, data: StatusUpdate, password: str =
 # ============ DELETE ENDPOINTS ============
 
 @api_router.delete("/admin/merchants/{merchant_id}")
-async def delete_merchant(merchant_id: str, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def delete_merchant(merchant_id: str, admin: dict = Depends(get_admin_user)):
     result = await db.merchants.delete_one({"id": merchant_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Commerçant non trouvé")
@@ -1475,10 +1454,7 @@ async def delete_merchant(merchant_id: str, password: str = Query(...)):
     return {"success": True, "message": "Commerçant supprimé"}
 
 @api_router.delete("/admin/riders/{rider_id}")
-async def delete_rider(rider_id: str, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def delete_rider(rider_id: str, admin: dict = Depends(get_admin_user)):
     active_deliveries = await db.delivery_requests.count_documents({
         "livreur_id": rider_id,
         "status": {"$in": ["assigne", "en_cours"]}
@@ -1497,10 +1473,7 @@ async def delete_rider(rider_id: str, password: str = Query(...)):
     return {"success": True, "message": "Livreur supprimé"}
 
 @api_router.delete("/admin/delivery-requests/{delivery_id}")
-async def delete_delivery_request(delivery_id: str, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def delete_delivery_request(delivery_id: str, admin: dict = Depends(get_admin_user)):
     delivery = await db.delivery_requests.find_one({"id": delivery_id}, {"_id": 0})
     if not delivery:
         raise HTTPException(status_code=404, detail="Commande non trouvée")
@@ -1518,10 +1491,7 @@ async def delete_delivery_request(delivery_id: str, password: str = Query(...)):
 # ============ DELIVERY MANAGEMENT ============
 
 @api_router.patch("/admin/delivery-requests/{delivery_id}/assign")
-async def assign_delivery_to_rider(delivery_id: str, data: AssignRider, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def assign_delivery_to_rider(delivery_id: str, data: AssignRider, admin: dict = Depends(get_admin_user)):
     delivery = await db.delivery_requests.find_one({"id": delivery_id}, {"_id": 0})
     if not delivery:
         raise HTTPException(status_code=404, detail="Commande non trouvée")
@@ -1577,10 +1547,7 @@ async def assign_delivery_to_rider(delivery_id: str, data: AssignRider, password
     return {"success": True, "message": f"Livraison assignée à {rider['prenom']} {rider['nom']}"}
 
 @api_router.patch("/admin/delivery-requests/{delivery_id}/status")
-async def update_delivery_status(delivery_id: str, data: StatusUpdate, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def update_delivery_status(delivery_id: str, data: StatusUpdate, admin: dict = Depends(get_admin_user)):
     delivery = await db.delivery_requests.find_one({"id": delivery_id}, {"_id": 0})
     if not delivery:
         raise HTTPException(status_code=404, detail="Commande non trouvée")
@@ -1672,10 +1639,7 @@ async def update_delivery_status(delivery_id: str, data: StatusUpdate, password:
 # ============ ANALYTICS ============
 
 @api_router.get("/admin/analytics")
-async def get_analytics(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def get_analytics(admin: dict = Depends(get_admin_user)):
     total_deliveries = await db.delivery_requests.count_documents({})
     completed_deliveries = await db.delivery_requests.count_documents({"status": "livre"})
     pending_deliveries = await db.delivery_requests.count_documents({"status": {"$in": ["nouveau", "assigne", "en_cours"]}})
@@ -1734,10 +1698,7 @@ async def get_analytics(password: str = Query(...)):
     }
 
 @api_router.get("/admin/stats")
-async def get_stats(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def get_stats(admin: dict = Depends(get_admin_user)):
     delivery_count = await db.delivery_requests.count_documents({})
     feedback_count = await db.feedback.count_documents({})
     merchant_count = await db.merchants.count_documents({})
@@ -1753,10 +1714,7 @@ async def get_stats(password: str = Query(...)):
 # ============ EXPORT ENDPOINTS ============
 
 @api_router.get("/admin/export/delivery-requests")
-async def export_delivery_requests(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def export_delivery_requests(admin: dict = Depends(get_admin_user)):
     items = await db.delivery_requests.find({}, {"_id": 0}).to_list(1000)
     
     # Explicit headers to handle varying schemas
@@ -1783,10 +1741,7 @@ async def export_delivery_requests(password: str = Query(...)):
     )
 
 @api_router.get("/admin/export/feedback")
-async def export_feedback(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def export_feedback(admin: dict = Depends(get_admin_user)):
     items = await db.feedback.find({}, {"_id": 0}).to_list(1000)
     
     # Explicit headers to handle varying schemas
@@ -1806,10 +1761,7 @@ async def export_feedback(password: str = Query(...)):
     )
 
 @api_router.get("/admin/export/merchants")
-async def export_merchants(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def export_merchants(admin: dict = Depends(get_admin_user)):
     items = await db.merchants.find({}, {"_id": 0}).to_list(1000)
     
     # Explicit headers to handle varying schemas
@@ -1833,10 +1785,7 @@ async def export_merchants(password: str = Query(...)):
     )
 
 @api_router.get("/admin/export/riders")
-async def export_riders(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def export_riders(admin: dict = Depends(get_admin_user)):
     items = await db.riders.find({}, {"_id": 0}).to_list(1000)
     
     # Explicit headers to handle varying schemas
@@ -1862,26 +1811,18 @@ async def export_riders(password: str = Query(...)):
 # ============ ADMIN ZONES MANAGEMENT ============
 
 @api_router.get("/admin/zones")
-async def get_all_zones(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
+async def get_all_zones(admin: dict = Depends(get_admin_user)):
     zones = await db.zones.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return zones
 
 @api_router.post("/admin/zones")
-async def create_zone(data: ZoneCreate, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def create_zone(data: ZoneCreate, admin: dict = Depends(get_admin_user)):
     zone = Zone(**data.model_dump())
     await db.zones.insert_one(zone.model_dump())
     return zone
 
 @api_router.patch("/admin/zones/{zone_id}")
-async def update_zone(zone_id: str, data: ZoneUpdate, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def update_zone(zone_id: str, data: ZoneUpdate, admin: dict = Depends(get_admin_user)):
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
@@ -1893,10 +1834,7 @@ async def update_zone(zone_id: str, data: ZoneUpdate, password: str = Query(...)
     return {"success": True, "message": "Zone mise à jour"}
 
 @api_router.delete("/admin/zones/{zone_id}")
-async def delete_zone(zone_id: str, password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def delete_zone(zone_id: str, admin: dict = Depends(get_admin_user)):
     result = await db.zones.delete_one({"id": zone_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Zone non trouvée")
@@ -1906,10 +1844,7 @@ async def delete_zone(zone_id: str, password: str = Query(...)):
 # ============ ADMIN PLATFORM SETTINGS ============
 
 @api_router.get("/admin/settings")
-async def get_platform_settings(password: str = Query(...)):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
+async def get_platform_settings(admin: dict = Depends(get_admin_user)):
     settings = await db.platform_settings.find_one({"id": "platform_settings"}, {"_id": 0})
     if not settings:
         # Return default settings
@@ -1924,15 +1859,12 @@ async def get_platform_settings(password: str = Query(...)):
 
 @api_router.put("/admin/settings")
 async def update_platform_settings(
-    password: str = Query(...),
+    admin: dict = Depends(get_admin_user),
     poids_seuil: float = Query(None),
     poids_supplement: int = Query(None),
     commission_type: str = Query(None),
     commission_value: float = Query(None)
 ):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
     update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
     if poids_seuil is not None:
         update_data["poids_seuil"] = poids_seuil
@@ -1955,13 +1887,10 @@ async def update_platform_settings(
 
 @api_router.get("/admin/financial")
 async def get_financial_stats(
-    password: str = Query(...),
+    admin: dict = Depends(get_admin_user),
     date_from: str = Query(None),
     date_to: str = Query(None)
 ):
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
     # Build date filter
     date_filter = {}
     if date_from:
@@ -2014,11 +1943,8 @@ async def get_financial_stats(
 # ============ INIT DEFAULT ZONES ============
 
 @api_router.post("/admin/init-zones")
-async def init_default_zones(password: str = Query(...)):
+async def init_default_zones(admin: dict = Depends(get_admin_user)):
     """Initialize default zones - only if no zones exist"""
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
-    
     existing = await db.zones.count_documents({})
     if existing > 0:
         raise HTTPException(status_code=400, detail="Des zones existent déjà")
@@ -2089,10 +2015,8 @@ async def mark_all_notifications_read(user: dict = Depends(get_current_user)):
 # ============ ADMIN FINANCES CSV EXPORT ============
 
 @api_router.get("/admin/export/finances")
-async def export_finances(password: str = Query(...)):
+async def export_finances(admin: dict = Depends(get_admin_user)):
     """CSV export of completed (livre) deliveries with financial fields."""
-    if password != ADMIN_PASSWORD:
-        raise HTTPException(status_code=401, detail="Non autorisé")
     rows = await db.delivery_requests.find(
         {"status": "livre"},
         {"_id": 0}

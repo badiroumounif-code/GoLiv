@@ -53,6 +53,12 @@ import { useAuth } from "../context/AuthContext";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+// Create axios instance with auth header
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("plb_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 // Items per page
 const ITEMS_PER_PAGE = 10;
 
@@ -61,7 +67,6 @@ export default function Admin() {
   const { user, isAuthenticated: jwtAuthenticated, logout: jwtLogout } = useAuth();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
-  const [loginLoading, setLoginLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [analytics, setAnalytics] = useState(null);
@@ -120,21 +125,17 @@ export default function Admin() {
   const [financialDateFrom, setFinancialDateFrom] = useState("");
   const [financialDateTo, setFinancialDateTo] = useState("");
   
-  const storedPassword = localStorage.getItem("plb_admin_password");
+  const storedToken = localStorage.getItem("plb_token");
 
   // Check if logged in via JWT as admin
   useEffect(() => {
     if (jwtAuthenticated && user?.role === "admin") {
-      // Use admin password for API calls
-      const adminPwd = "plb2024";
-      localStorage.setItem("plb_admin_password", adminPwd);
-      setPassword(adminPwd);
       setIsAuthenticated(true);
-    } else if (storedPassword) {
-      setPassword(storedPassword);
+    } else if (storedToken) {
+      // Verify token is still valid
       setIsAuthenticated(true);
     }
-  }, [jwtAuthenticated, user, storedPassword]);
+  }, [jwtAuthenticated, user, storedToken]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -147,30 +148,7 @@ export default function Admin() {
     setCurrentPage(1);
   }, [searchQuery, statusFilter, urgencyFilter, dateFrom, dateTo, zoneFilter, riderFilter]);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!password) {
-      toast.error("Veuillez entrer le mot de passe");
-      return;
-    }
-
-    setLoginLoading(true);
-    try {
-      const response = await axios.post(`${API}/admin/login`, { password });
-      if (response.data.success) {
-        localStorage.setItem("plb_admin_password", password);
-        setIsAuthenticated(true);
-        toast.success("Connexion réussie");
-      }
-    } catch (error) {
-      toast.error("Mot de passe incorrect");
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
   const handleLogout = () => {
-    localStorage.removeItem("plb_admin_password");
     setIsAuthenticated(false);
     setPassword("");
     // Also logout from JWT if logged in
@@ -183,19 +161,19 @@ export default function Admin() {
 
   const loadAllData = async () => {
     setLoading(true);
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     try {
       const [statsRes, analyticsRes, deliveryRes, feedbackRes, merchantsRes, ridersRes, contactsRes, zonesRes, settingsRes, financialRes] = await Promise.all([
-        axios.get(`${API}/admin/stats?password=${pwd}`),
-        axios.get(`${API}/admin/analytics?password=${pwd}`),
-        axios.get(`${API}/admin/delivery-requests?password=${pwd}`),
-        axios.get(`${API}/admin/feedback?password=${pwd}`),
-        axios.get(`${API}/admin/merchants?password=${pwd}`),
-        axios.get(`${API}/admin/riders?password=${pwd}`),
-        axios.get(`${API}/admin/contacts?password=${pwd}`),
-        axios.get(`${API}/admin/zones?password=${pwd}`).catch(() => ({ data: [] })),
-        axios.get(`${API}/admin/settings?password=${pwd}`).catch(() => ({ data: null })),
-        axios.get(`${API}/admin/financial?password=${pwd}`).catch(() => ({ data: null }))
+        axios.get(`${API}/admin/stats`, { headers }),
+        axios.get(`${API}/admin/analytics`, { headers }),
+        axios.get(`${API}/admin/delivery-requests`, { headers }),
+        axios.get(`${API}/admin/feedback`, { headers }),
+        axios.get(`${API}/admin/merchants`, { headers }),
+        axios.get(`${API}/admin/riders`, { headers }),
+        axios.get(`${API}/admin/contacts`, { headers }),
+        axios.get(`${API}/admin/zones`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API}/admin/settings`, { headers }).catch(() => ({ data: null })),
+        axios.get(`${API}/admin/financial`, { headers }).catch(() => ({ data: null }))
       ]);
       
       setStats(statsRes.data);
@@ -209,9 +187,9 @@ export default function Admin() {
       setPlatformSettings(settingsRes.data);
       setFinancialStats(financialRes.data);
     } catch (error) {
-      if (error.response?.status === 401) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
         handleLogout();
-        toast.error("Session expirée");
+        toast.error("Session expirée ou accès non autorisé");
       } else {
         toast.error("Erreur lors du chargement des données");
       }
@@ -220,23 +198,41 @@ export default function Admin() {
     }
   };
 
-  const handleExport = (type) => {
-    const pwd = localStorage.getItem("plb_admin_password");
-    window.open(`${API}/admin/export/${type}?password=${pwd}`, "_blank");
-    toast.success("Export en cours...");
+  const handleExport = async (type) => {
+    const headers = getAuthHeaders();
+    try {
+      const response = await axios.get(`${API}/admin/export/${type}`, {
+        headers,
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${type}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Export téléchargé");
+    } catch (error) {
+      toast.error("Erreur lors de l'export");
+    }
   };
 
   // Zone management functions
   const handleSaveZone = async (zone) => {
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     setSettingsLoading(true);
     try {
-      await axios.patch(`${API}/admin/zones/${zone.id}?password=${pwd}`, {
+      await axios.patch(`${API}/admin/zones/${zone.id}`, {
         nom: zone.nom,
         prix_base: parseInt(zone.prix_base),
         paiement_livreur: parseInt(zone.paiement_livreur),
         is_active: zone.is_active
-      });
+      }, { headers });
       toast.success("Zone mise à jour");
       setEditingZone(null);
       loadAllData();
@@ -252,15 +248,15 @@ export default function Admin() {
       toast.error("Veuillez remplir tous les champs");
       return;
     }
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     setSettingsLoading(true);
     try {
-      await axios.post(`${API}/admin/zones?password=${pwd}`, {
+      await axios.post(`${API}/admin/zones`, {
         nom: newZone.nom,
         prix_base: parseInt(newZone.prix_base),
         paiement_livreur: parseInt(newZone.paiement_livreur),
         is_active: true
-      });
+      }, { headers });
       toast.success("Zone créée");
       setNewZone({ nom: "", prix_base: "", paiement_livreur: "" });
       setShowNewZoneForm(false);
@@ -273,9 +269,9 @@ export default function Admin() {
   };
 
   const handleDeleteZone = async (zoneId) => {
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     try {
-      await axios.delete(`${API}/admin/zones/${zoneId}?password=${pwd}`);
+      await axios.delete(`${API}/admin/zones/${zoneId}`, { headers });
       toast.success("Zone supprimée");
       loadAllData();
     } catch (error) {
@@ -284,17 +280,16 @@ export default function Admin() {
   };
 
   const handleSaveSettings = async () => {
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     setSettingsLoading(true);
     try {
       const params = new URLSearchParams({
-        password: pwd,
         poids_seuil: platformSettings.poids_seuil,
         poids_supplement: platformSettings.poids_supplement,
         commission_type: platformSettings.commission_type,
         commission_value: platformSettings.commission_value
       });
-      await axios.put(`${API}/admin/settings?${params.toString()}`);
+      await axios.put(`${API}/admin/settings?${params.toString()}`, {}, { headers });
       toast.success("Paramètres sauvegardés");
     } catch (error) {
       toast.error("Erreur lors de la sauvegarde");
@@ -304,12 +299,14 @@ export default function Admin() {
   };
 
   const loadFinancialData = async () => {
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     try {
-      let url = `${API}/admin/financial?password=${pwd}`;
-      if (financialDateFrom) url += `&date_from=${financialDateFrom}`;
-      if (financialDateTo) url += `&date_to=${financialDateTo}`;
-      const res = await axios.get(url);
+      let url = `${API}/admin/financial`;
+      const params = [];
+      if (financialDateFrom) params.push(`date_from=${financialDateFrom}`);
+      if (financialDateTo) params.push(`date_to=${financialDateTo}`);
+      if (params.length) url += `?${params.join('&')}`;
+      const res = await axios.get(url, { headers });
       setFinancialStats(res.data);
     } catch (error) {
       toast.error("Erreur lors du chargement des données financières");
@@ -536,17 +533,17 @@ export default function Admin() {
     }
     
     setActionLoading(true);
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     
     try {
       const endpoint = statusType === 'merchant' 
         ? `${API}/admin/merchants/${selectedItem.id}/status`
         : `${API}/admin/riders/${selectedItem.id}/status`;
       
-      await axios.patch(`${endpoint}?password=${pwd}`, {
+      await axios.patch(endpoint, {
         status: selectedStatus,
         reason: statusReason || null
-      });
+      }, { headers });
       
       toast.success(`Statut mis à jour et email envoyé !`);
       setStatusOpen(false);
@@ -568,12 +565,13 @@ export default function Admin() {
     }
     
     setActionLoading(true);
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     
     try {
       await axios.patch(
-        `${API}/admin/delivery-requests/${selectedItem.id}/assign?password=${pwd}`,
-        { livreur_id: selectedRiderId }
+        `${API}/admin/delivery-requests/${selectedItem.id}/assign`,
+        { livreur_id: selectedRiderId },
+        { headers }
       );
       
       toast.success("Livraison assignée avec succès !");
@@ -589,12 +587,13 @@ export default function Admin() {
 
   // Handle delivery status update
   const handleDeliveryStatusUpdate = async (deliveryId, newStatus) => {
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     
     try {
       await axios.patch(
-        `${API}/admin/delivery-requests/${deliveryId}/status?password=${pwd}`,
-        { status: newStatus }
+        `${API}/admin/delivery-requests/${deliveryId}/status`,
+        { status: newStatus },
+        { headers }
       );
       
       toast.success(`Statut mis à jour: ${getStatusLabel(newStatus)}`);
@@ -607,19 +606,19 @@ export default function Admin() {
   // Handle delete
   const handleDelete = async () => {
     setActionLoading(true);
-    const pwd = localStorage.getItem("plb_admin_password");
+    const headers = getAuthHeaders();
     
     try {
       let endpoint = '';
       if (deleteType === 'merchant') {
-        endpoint = `${API}/admin/merchants/${selectedItem.id}?password=${pwd}`;
+        endpoint = `${API}/admin/merchants/${selectedItem.id}`;
       } else if (deleteType === 'rider') {
-        endpoint = `${API}/admin/riders/${selectedItem.id}?password=${pwd}`;
+        endpoint = `${API}/admin/riders/${selectedItem.id}`;
       } else if (deleteType === 'delivery') {
-        endpoint = `${API}/admin/delivery-requests/${selectedItem.id}?password=${pwd}`;
+        endpoint = `${API}/admin/delivery-requests/${selectedItem.id}`;
       }
       
-      await axios.delete(endpoint);
+      await axios.delete(endpoint, { headers });
       
       toast.success("Suppression effectuée");
       setDeleteOpen(false);
@@ -657,6 +656,7 @@ export default function Admin() {
   const acceptedRiders = riders.filter(r => r.status === 'accepte');
   const hasActiveFilters = searchQuery || statusFilter !== "all" || urgencyFilter !== "all" || dateFrom || dateTo || zoneFilter !== "all" || riderFilter !== "all";
 
+  // Redirect to login page if not authenticated as admin
   if (!isAuthenticated) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center" data-testid="admin-login-page">
@@ -674,41 +674,17 @@ export default function Admin() {
                 Administration
               </h1>
               <p className="text-slate-500 text-sm mt-1">
-                Connectez-vous pour accéder au tableau de bord
+                Connectez-vous avec votre compte administrateur
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4" data-testid="admin-login-form">
-              <div>
-                <Label htmlFor="password" className="text-slate-700 mb-2 block">
-                  Mot de passe
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Entrez le mot de passe"
-                  className="rounded-xl h-12"
-                  data-testid="admin-password-input"
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={loginLoading}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white rounded-full h-12"
-                data-testid="admin-login-btn"
-              >
-                {loginLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Connexion...
-                  </>
-                ) : (
-                  "Se connecter"
-                )}
-              </Button>
-            </form>
+            <Button
+              onClick={() => navigate("/connexion")}
+              className="w-full bg-sky-500 hover:bg-sky-600 text-white rounded-full h-12"
+              data-testid="admin-goto-login-btn"
+            >
+              Se connecter
+            </Button>
           </div>
         </motion.div>
       </div>
