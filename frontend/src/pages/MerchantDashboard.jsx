@@ -603,7 +603,7 @@ export default function MerchantDashboard() {
                     name="telephone_client"
                     value={newDelivery.telephone_client}
                     onChange={handleNewDeliveryChange}
-                    placeholder="+229 97 00 11 22"
+                    placeholder="+229 01 XX XX XX XX"
                     className="rounded-xl mt-1"
                     required
                     data-testid="input-telephone-client"
@@ -613,7 +613,7 @@ export default function MerchantDashboard() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="zone_enlevement">Zone d'enlèvement *</Label>
+                  <Label htmlFor="zone_enlevement">Zone de récupération *</Label>
                   <select
                     id="zone_enlevement"
                     name="zone_enlevement"

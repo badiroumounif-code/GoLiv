@@ -701,7 +701,7 @@ export default function Admin() {
               <h1 className="font-heading text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
                 Tableau de bord
               </h1>
-              <p className="text-sm text-slate-500 mt-0.5">Gestion GoLiv Logistique</p>
+              <p className="text-sm text-slate-500 mt-0.5">Gestion GoLiv</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <Button
@@ -2117,7 +2117,7 @@ export default function Admin() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-slate-500">Zone d&apos;enlèvement</p>
+                  <p className="text-sm text-slate-500">Zone de récupération</p>
                   <p className="font-medium text-slate-900">{selectedItem.zone_enlevement}</p>
                 </div>
                 <div>

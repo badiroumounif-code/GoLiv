@@ -104,7 +104,7 @@ export default function Feedback() {
             </h1>
             <p className="body-lead">
               Votre retour d&apos;expérience nous aide à améliorer nos services. 
-              Partagez votre expérience avec GoLiv Logistique.
+              Partagez votre expérience avec GoLiv.
             </p>
           </motion.div>
         </div>
@@ -194,7 +194,7 @@ export default function Feedback() {
                       name="telephone"
                       value={formData.telephone}
                       onChange={handleChange}
-                      placeholder="+229 XX XX XX XX"
+                      placeholder="+229 01 XX XX XX XX"
                       className="rounded-xl h-12"
                       data-testid="feedback-telephone-input"
                     />
@@ -211,7 +211,7 @@ export default function Feedback() {
                     name="commentaire"
                     value={formData.commentaire}
                     onChange={handleChange}
-                    placeholder="Décrivez votre expérience avec GoLiv Logistique..."
+                    placeholder="Décrivez votre expérience avec GoLiv..."
                     className="rounded-xl min-h-[100px]"
                     data-testid="feedback-commentaire-input"
                   />

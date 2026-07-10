@@ -87,7 +87,7 @@ const faqCategories = [
     questions: [
       {
         question: "Comment contacter le service client ?",
-        answer: "Vous pouvez nous joindre par téléphone au +229 97 00 00 00 (du lundi au samedi, 8h-20h), par email à contact@goliv-logistique.bj, ou via notre formulaire de contact sur le site. Pour les urgences liées à une livraison en cours, privilégiez le téléphone."
+        answer: "Vous pouvez nous joindre par téléphone au +229 01 91 20 78 86 (du lundi au samedi, 8h-20h), par email à goliv@gmail.com, ou via notre formulaire de contact sur le site. Pour les urgences liées à une livraison en cours, privilégiez le téléphone."
       },
       {
         question: "Comment devenir partenaire livreur ?",
@@ -268,11 +268,11 @@ export default function FAQ() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <a
-                href="tel:+22997000000"
+                href="tel:+2290191207886"
                 className="flex items-center justify-center gap-2 bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 rounded-full font-medium transition-colors"
               >
                 <Phone className="w-5 h-5" />
-                +229 97 00 00 00
+                +229 01 91 20 78 86
               </a>
               <a
                 href="/contact"

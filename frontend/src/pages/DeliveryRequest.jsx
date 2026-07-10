@@ -284,7 +284,7 @@ export default function DeliveryRequest() {
                       name="telephone"
                       value={formData.telephone}
                       onChange={handleChange}
-                      placeholder="+229 XX XX XX XX"
+                      placeholder="+229 01 XX XX XX XX"
                       className="rounded-xl h-12"
                       data-testid="delivery-telephone-input"
                     />
@@ -295,7 +295,7 @@ export default function DeliveryRequest() {
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
                     <Label className="text-slate-700 mb-2 block">
-                      Zone d&apos;enlèvement *
+                      Zone de récupération *
                     </Label>
                     <Select
                       value={formData.zone_enlevement}
@@ -310,6 +310,9 @@ export default function DeliveryRequest() {
                             {zone}
                           </SelectItem>
                         ))}
+                        <SelectItem key="autre-pickup" value="Autre">
+                          Autre
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -330,6 +333,9 @@ export default function DeliveryRequest() {
                             {zone.nom} - {zone.prix_base.toLocaleString()} FCFA
                           </SelectItem>
                         ))}
+                        <SelectItem key="autre-delivery" value="autre">
+                          Autre
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

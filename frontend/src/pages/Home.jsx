@@ -123,7 +123,7 @@ export default function Home() {
               </h1>
               
               <p className="body-lead max-w-lg">
-                GoLiv Logistique est votre partenaire de confiance pour la livraison de colis à Cotonou, 
+                GoLiv est votre partenaire de confiance pour la livraison de colis à Cotonou, 
                 Porto-Novo et Calavi. Rapide, fiable et à votre service.
               </p>
               
@@ -169,7 +169,7 @@ export default function Home() {
               <div className="relative">
                 <img
                   src="https://images.pexels.com/photos/12725436/pexels-photo-12725436.jpeg"
-                  alt="Livreur GoLiv Logistique"
+                  alt="Livreur GoLiv"
                   className="w-full h-[500px] object-cover rounded-3xl shadow-2xl"
                 />
                 <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-lg border border-slate-100">
@@ -332,7 +332,7 @@ export default function Home() {
           >
             <span className="eyebrow-label">Nos avantages</span>
             <h2 className="heading-section mt-3">
-              Pourquoi choisir GoLiv Logistique ?
+              Pourquoi choisir GoLiv ?
             </h2>
           </motion.div>
 
@@ -429,7 +429,7 @@ export default function Home() {
                 Prêt à expédier ?
               </h2>
               <p className="text-sky-100 text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-                Faites confiance à GoLiv Logistique pour vos livraisons. Simple, rapide et fiable.
+                Faites confiance à GoLiv pour vos livraisons. Simple, rapide et fiable.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <Link to="/demande-livraison" className="w-full sm:w-auto">
@@ -468,12 +468,12 @@ export default function Home() {
               {
                 name: "Aïcha K.",
                 role: "Commerçante, Cotonou",
-                text: "GoLiv Logistique a transformé mon business. Mes clients reçoivent leurs commandes rapidement et en parfait état."
+                text: "GoLiv a transformé mon business. Mes clients reçoivent leurs commandes rapidement et en parfait état."
               },
               {
                 name: "Emmanuel D.",
                 role: "Entrepreneur, Porto-Novo",
-                text: "Service fiable et professionnel. Je recommande GoLiv Logistique à tous mes collègues entrepreneurs."
+                text: "Service fiable et professionnel. Je recommande GoLiv à tous mes collègues entrepreneurs."
               },
               {
                 name: "Fatou S.",

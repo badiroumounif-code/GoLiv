@@ -123,7 +123,7 @@ export default function LoginPage() {
             <p className="text-sky-100 text-sm">
               {isLogin 
                 ? "Accédez à votre espace personnel" 
-                : "Rejoignez GoLiv Logistique"}
+                : "Rejoignez GoLiv"}
             </p>
           </div>
 
@@ -187,7 +187,7 @@ export default function LoginPage() {
                       name="telephone"
                       value={formData.telephone}
                       onChange={handleChange}
-                      placeholder="+229 97 00 11 22"
+                      placeholder="+229 01 XX XX XX XX"
                       className="pl-10 rounded-xl"
                       data-testid="input-telephone"
                     />

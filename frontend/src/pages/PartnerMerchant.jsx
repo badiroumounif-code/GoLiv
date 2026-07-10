@@ -201,7 +201,7 @@ export default function PartnerMerchant() {
                       name="telephone"
                       value={formData.telephone}
                       onChange={handleChange}
-                      placeholder="+229 XX XX XX XX"
+                      placeholder="+229 01 XX XX XX XX"
                       className="rounded-xl h-12"
                       data-testid="merchant-telephone-input"
                     />

@@ -24,7 +24,7 @@ export default function About() {
     {
       name: "L'équipe de direction",
       role: "Gestion et stratégie",
-      description: "Une équipe passionnée qui pilote la vision de GoLiv Logistique."
+      description: "Une équipe passionnée qui pilote la vision de GoLiv."
     },
     {
       name: "Nos livreurs",
@@ -50,10 +50,10 @@ export default function About() {
           >
             <span className="eyebrow-label">Notre histoire</span>
             <h1 className="heading-hero mt-3 mb-5">
-              À propos de GoLiv Logistique
+              À propos de GoLiv
             </h1>
             <p className="body-lead">
-              Née de la volonté de moderniser la livraison au Bénin, GoLiv Logistique s&apos;engage 
+              Née de la volonté de moderniser la livraison au Bénin, GoLiv s&apos;engage 
               à offrir un service de qualité, accessible et fiable à tous.
             </p>
           </motion.div>
@@ -71,7 +71,7 @@ export default function About() {
             >
               <img
                 src="https://images.unsplash.com/photo-1768796373360-95d80c5830fb?w=800"
-                alt="Équipe GoLiv Logistique"
+                alt="Équipe GoLiv"
                 className="w-full h-72 md:h-[420px] object-cover rounded-3xl shadow-soft"
               />
             </motion.div>
@@ -87,12 +87,12 @@ export default function About() {
                 Simplifier la logistique pour tous
               </h2>
               <p className="text-slate-600 leading-relaxed">
-                GoLiv Logistique est née d&apos;un constat simple : la livraison de colis au Bénin peut être 
+                GoLiv est née d&apos;un constat simple : la livraison de colis au Bénin peut être 
                 compliquée, coûteuse et peu fiable. Nous avons décidé de changer cela.
               </p>
               <p className="text-slate-600 leading-relaxed">
                 Notre mission est de rendre la livraison accessible à tous, que vous soyez un particulier 
-                envoyant un colis à un proche ou un commerçant livrant ses clients. Avec GoLiv Logistique, 
+                envoyant un colis à un proche ou un commerçant livrant ses clients. Avec GoLiv, 
                 chaque envoi est entre de bonnes mains.
               </p>
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-3">

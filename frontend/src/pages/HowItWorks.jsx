@@ -9,7 +9,7 @@ export default function HowItWorks() {
       number: "01",
       icon: <ClipboardList className="w-8 h-8" />,
       title: "Faites votre demande",
-      description: "Remplissez notre formulaire en ligne avec les détails de votre colis : zones d'enlèvement et de livraison, type de colis et niveau d'urgence."
+      description: "Remplissez notre formulaire en ligne avec les détails de votre colis : zones de récupération et de livraison, type de colis et niveau d'urgence."
     },
     {
       number: "02",
@@ -46,7 +46,7 @@ export default function HowItWorks() {
     },
     {
       question: "Puis-je suivre ma livraison ?",
-      answer: "Oui, vous serez informé par téléphone des différentes étapes de votre livraison : enlèvement, en cours de livraison et livré."
+      answer: "Oui, vous serez informé par téléphone des différentes étapes de votre livraison : récupération, en cours de livraison et livré."
     }
   ];
 

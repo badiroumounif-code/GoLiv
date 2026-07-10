@@ -52,12 +52,12 @@ export default function Contact() {
     {
       icon: <Phone className="w-5 h-5" />,
       title: "Téléphone",
-      content: "+229 XX XX XX XX"
+      content: "+229 01 91 20 78 86"
     },
     {
       icon: <Mail className="w-5 h-5" />,
       title: "Email",
-      content: "contact@golivlogistique.com"
+      content: "goliv@gmail.com"
     },
     {
       icon: <Clock className="w-5 h-5" />,
