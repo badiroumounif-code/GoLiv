@@ -1629,6 +1629,44 @@ async def update_delivery_status(delivery_id: str, data: StatusUpdate, admin: di
                 message=f"{tracking} • {delivery.get('zone_livraison', '')}",
                 link="/espace-livreur"
             )
+        
+        # Email notifications for important status changes
+        if new_status == "en_cours":
+            # Notify customer that delivery is in progress
+            html = f"""
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f8fafc; border-radius: 16px;">
+                <h2 style="color: #0ea5e9;">🚚 Votre livraison est en route !</h2>
+                <p><strong>Numéro de suivi:</strong> {tracking}</p>
+                <p>Votre colis est maintenant en cours de livraison vers <strong>{delivery.get('zone_livraison', '')}</strong>.</p>
+                <p>Livreur: <strong>{delivery.get('livreur_nom', 'Non assigné')}</strong></p>
+                <p style="margin-top: 20px;">
+                    <a href="{os.environ.get('REACT_APP_BACKEND_URL', '')}" 
+                       style="background-color: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+                        Suivre ma livraison
+                    </a>
+                </p>
+            </div>
+            """
+            await send_notification_email(f"🚚 {tracking} - En cours de livraison", html)
+            
+        elif new_status == "livre":
+            # Notify customer that delivery is complete
+            html = f"""
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f0fdf4; border-radius: 16px;">
+                <h2 style="color: #22c55e;">✅ Livraison effectuée !</h2>
+                <p><strong>Numéro de suivi:</strong> {tracking}</p>
+                <p>Votre colis a été livré avec succès à <strong>{delivery.get('zone_livraison', '')}</strong>.</p>
+                {f'<p><strong>Notes:</strong> {delivery.get("delivery_notes", "")}</p>' if delivery.get("delivery_notes") else ''}
+                <p style="margin-top: 20px;">Merci d'avoir choisi GoLiv !</p>
+                <p>
+                    <a href="{os.environ.get('REACT_APP_BACKEND_URL', '')}/donner-avis" 
+                       style="background-color: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">
+                        Donner votre avis
+                    </a>
+                </p>
+            </div>
+            """
+            await send_notification_email(f"✅ {tracking} - Livraison effectuée", html)
     
     return {"success": True, "message": f"Statut mis à jour: {new_status}"}
 
