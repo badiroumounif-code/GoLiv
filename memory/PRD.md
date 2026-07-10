@@ -111,6 +111,15 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 - Solution: Explicit header lists with `extrasaction='ignore'`
 - All 4 CSV exports now return 200 with proper headers
 
+### Phase 9.2 - Admin Routes Security Fix ✅ (December 2025)
+- **SECURITY FIX**: Replaced `password: str = Query(...)` with JWT Bearer token verification
+- All 27+ admin routes now use `Depends(get_admin_user)` dependency
+- `get_admin_user` validates JWT token AND requires `role == "admin"`
+- Frontend Admin.jsx updated to use `Authorization: Bearer <token>` headers
+- CSV exports now use authenticated blob downloads (no password in URL)
+- Removed legacy `/api/admin/login` endpoint (dead code)
+- 47 regression tests added in `/app/backend/tests/test_admin_jwt_security.py`
+
 ---
 
 ## Technical Architecture

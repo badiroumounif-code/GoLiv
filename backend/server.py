@@ -260,9 +260,6 @@ class ContactMessageCreate(BaseModel):
     sujet: str
     message: str
 
-class AdminLogin(BaseModel):
-    password: str
-
 class GoogleSessionRequest(BaseModel):
     session_id: str
 
@@ -1265,12 +1262,6 @@ async def export_merchant_deliveries(user: dict = Depends(get_current_user)):
     )
 
 # ============ ADMIN ENDPOINTS ============
-
-@api_router.post("/admin/login")
-async def admin_login(data: AdminLogin):
-    if data.password == ADMIN_PASSWORD:
-        return {"success": True, "message": "Connexion réussie"}
-    raise HTTPException(status_code=401, detail="Mot de passe incorrect")
 
 @api_router.get("/admin/delivery-requests")
 async def get_delivery_requests(admin: dict = Depends(get_admin_user)):
