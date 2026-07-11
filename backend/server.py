@@ -802,7 +802,8 @@ async def create_merchant(data: MerchantCreate):
     doc = merchant.model_dump()
     await db.merchants.insert_one(doc)
     
-    html = f"""
+    # Email to admin (internal notification)
+    html_admin = f"""
     <h2>🏪 Nouvelle Candidature Commerçant</h2>
     <p><strong>Entreprise:</strong> {merchant.nom_entreprise}</p>
     <p><strong>Contact:</strong> {merchant.nom_contact}</p>
@@ -811,7 +812,45 @@ async def create_merchant(data: MerchantCreate):
     <p><strong>Type de produits:</strong> {merchant.type_produits}</p>
     <p><strong>Volume mensuel:</strong> {merchant.volume_mensuel}</p>
     """
-    await send_notification_email(f"🏪 Nouveau commerçant: {merchant.nom_entreprise}", html)
+    await send_notification_email(f"🏪 Nouveau commerçant: {merchant.nom_entreprise}", html_admin)
+    
+    # Confirmation email to merchant
+    html_merchant = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0;">🏪 GoLiv</h1>
+            <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Votre partenaire livraison</p>
+        </div>
+        <div style="background: #ffffff; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px;">
+            <h2 style="color: #1e293b; margin-top: 0;">Bonjour {merchant.nom_contact},</h2>
+            <p style="color: #475569; line-height: 1.6;">
+                Nous avons bien reçu votre candidature pour devenir partenaire commerçant chez <strong>GoLiv</strong>.
+            </p>
+            <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+                <p style="margin: 0; color: #0369a1;"><strong>Entreprise:</strong> {merchant.nom_entreprise}</p>
+                <p style="margin: 5px 0 0 0; color: #0369a1;"><strong>Type de produits:</strong> {merchant.type_produits}</p>
+            </div>
+            <p style="color: #475569; line-height: 1.6;">
+                Notre équipe va examiner votre dossier dans les plus brefs délais. 
+                Vous recevrez une réponse par email dans les <strong>24 à 48 heures</strong>.
+            </p>
+            <p style="color: #475569; line-height: 1.6;">
+                En attendant, n'hésitez pas à nous contacter si vous avez des questions.
+            </p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;">
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">
+                Cordialement,<br>
+                <strong>L'équipe GoLiv</strong><br>
+                📞 +229 01 91 20 78 86 | ✉️ goliv@gmail.com
+            </p>
+        </div>
+    </div>
+    """
+    await send_notification_email(
+        f"✅ GoLiv - Candidature reçue ({merchant.nom_entreprise})",
+        html_merchant,
+        merchant.email
+    )
     
     return merchant
 
@@ -822,7 +861,8 @@ async def create_rider(data: RiderCreate):
     doc = rider.model_dump()
     await db.riders.insert_one(doc)
     
-    html = f"""
+    # Email to admin (internal notification)
+    html_admin = f"""
     <h2>🏍️ Nouvelle Candidature Livreur</h2>
     <p><strong>Nom:</strong> {rider.prenom} {rider.nom}</p>
     <p><strong>Téléphone:</strong> {rider.telephone}</p>
@@ -830,7 +870,49 @@ async def create_rider(data: RiderCreate):
     <p><strong>Zone:</strong> {rider.zone_couverture}</p>
     <p><strong>Véhicule:</strong> {rider.type_vehicule}</p>
     """
-    await send_notification_email(f"🏍️ Nouveau livreur: {rider.prenom} {rider.nom}", html)
+    await send_notification_email(f"🏍️ Nouveau livreur: {rider.prenom} {rider.nom}", html_admin)
+    
+    # Confirmation email to rider
+    html_rider = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0;">🏍️ GoLiv</h1>
+            <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Rejoignez notre équipe de livreurs</p>
+        </div>
+        <div style="background: #ffffff; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px;">
+            <h2 style="color: #1e293b; margin-top: 0;">Bonjour {rider.prenom},</h2>
+            <p style="color: #475569; line-height: 1.6;">
+                Nous avons bien reçu votre candidature pour devenir livreur partenaire chez <strong>GoLiv</strong>.
+            </p>
+            <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+                <p style="margin: 0; color: #0369a1;"><strong>Zone de couverture:</strong> {rider.zone_couverture}</p>
+                <p style="margin: 5px 0 0 0; color: #0369a1;"><strong>Type de véhicule:</strong> {rider.type_vehicule}</p>
+            </div>
+            <p style="color: #475569; line-height: 1.6;">
+                Notre équipe va examiner votre dossier dans les plus brefs délais. 
+                Vous recevrez une réponse par email dans les <strong>24 à 48 heures</strong>.
+            </p>
+            <h3 style="color: #1e293b;">Prochaines étapes :</h3>
+            <ol style="color: #475569; line-height: 1.8;">
+                <li>Examen de votre candidature</li>
+                <li>Entretien téléphonique (si retenu)</li>
+                <li>Création de votre compte livreur</li>
+                <li>Formation et démarrage 🚀</li>
+            </ol>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;">
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 0;">
+                Cordialement,<br>
+                <strong>L'équipe GoLiv</strong><br>
+                📞 +229 01 91 20 78 86 | ✉️ goliv@gmail.com
+            </p>
+        </div>
+    </div>
+    """
+    await send_notification_email(
+        f"✅ GoLiv - Candidature reçue ({rider.prenom} {rider.nom})",
+        html_rider,
+        rider.email
+    )
     
     return rider
 

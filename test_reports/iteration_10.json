@@ -1,0 +1,38 @@
+{
+  "summary": "Iteration 10 — Registration confirmation emails verified. Both POST /api/riders and POST /api/merchants now send TWO emails: the pre-existing admin notification AND a new confirmation email to the applicant. Created /app/backend/tests/test_registration_confirmation_emails.py (6 tests, 100% pass in 30.35s). Log evidence captured for both success and graceful-failure paths.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_registration_confirmation_emails.py",
+    "/app/test_reports/pytest/pytest_registration_confirmation_emails.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "create_rider (server.py L858-917) — correctly awaits send_notification_email twice: first with admin subject '🏍️ Nouveau livreur: {prenom} {nom}' (no to_email → defaults to ADMIN_EMAIL) and then with subject '✅ GoLiv - Candidature reçue ({prenom} {nom})' targeting rider.email. Verified end-to-end in log.",
+    "create_merchant (server.py L799-855) — same pattern: admin subject '🏪 Nouveau commerçant: {nom_entreprise}' + confirmation subject '✅ GoLiv - Candidature reçue ({nom_entreprise})' to merchant.email. Verified.",
+    "Confirmation HTML for rider includes rider.prenom greeting, rider.zone_couverture and rider.type_vehicule in a highlighted box (L887-889) — matches requirement.",
+    "Confirmation HTML for merchant includes merchant.nom_contact greeting, merchant.nom_entreprise and merchant.type_produits (L830-831) — matches requirement.",
+    "Graceful failure preserved: when applicant email is not the Resend verified sandbox owner, send_notification_email returns False, logs 'Failed to send email: ...', and the endpoint still returns 200. Admin email path is unaffected (goes to ADMIN_EMAIL).",
+    "Minor latency observation (non-blocking, unchanged from iter 9): 4 awaited email calls per successful merchant/rider registration means the POST response is delayed by ~1-3s. Consider FastAPI BackgroundTasks or asyncio.create_task for fire-and-forget dispatch if latency becomes a UX concern."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_registration_confirmation_emails.py (NEW — 6 tests covering sanity, rider happy path, rider graceful failure, merchant happy path, merchant graceful failure)"
+  ],
+  "success_rate": {
+    "backend": "100% (6/6 tests pass in 30.35s)",
+    "frontend": "N/A — testing_type=backend only"
+  },
+  "test_credentials": "No auth required — /api/riders and /api/merchants are public registration endpoints. RESEND_API_KEY and ADMIN_EMAIL=badiroumounif@gmail.com read from /app/backend/.env.",
+  "seed_data_creation": "Created 4 registration records with TEST_ prefix (2 riders: TEST_RiderConf Confirm{ts}, TEST_RiderGraceful Unverified{ts}; 2 merchants: TEST_MerchantCorp{ts}, TEST_MerchantGrace{ts}). Cleanup queries: db.riders.deleteMany({nom: {$regex: '^Confirm|^Unverified'}}); db.merchants.deleteMany({nom_entreprise: {$regex: '^TEST_Merchant'}}).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Confirmation-email regression suite: /app/backend/tests/test_registration_confirmation_emails.py. Strategy: (1) capture byte offset of /var/log/supervisor/backend.err.log BEFORE POST, (2) call POST /api/riders or /api/merchants with VERIFIED_OWNER_EMAIL (badiroumounif@gmail.com) so Resend accepts both messages, (3) sleep 8s for asyncio.to_thread + Resend latency, (4) assert BOTH admin marker 'Email sent successfully: 🏍️ Nouveau livreur: ...' (or '🏪 Nouveau commerçant: ...') AND confirmation marker 'Email sent successfully: ✅ GoLiv - Candidature reçue ({name})' appear in the new log window. Graceful tests use unverified email addresses and assert that admin path still succeeds while confirmation path is at least invoked (success OR 'Failed to send email' line). If Resend key or sandbox owner changes, update VERIFIED_OWNER_EMAIL constant. Iteration 9 suite (test_email_delivery_notification.py) covers the delivery-request email path and remains passing.",
+  "rca of the issue": "N/A — feature works as specified. Observed log lines from this run:\n  - Rider admin:    'INFO - Email sent successfully: 🏍️ Nouveau livreur: TEST_RiderConf Confirm{ts}'\n  - Rider confirm:  'INFO - Email sent successfully: ✅ GoLiv - Candidature reçue (TEST_RiderConf Confirm{ts})'\n  - Merchant admin: 'INFO - Email sent successfully: 🏪 Nouveau commerçant: TEST_MerchantCorp{ts}'\n  - Merchant conf:  'INFO - Email sent successfully: ✅ GoLiv - Candidature reçue (TEST_MerchantCorp{ts})'\nAll 4 required 'Email sent successfully' lines present. Graceful failure verified for unverified recipient (ERROR 'Failed to send email' line + 200 response)."
+}
