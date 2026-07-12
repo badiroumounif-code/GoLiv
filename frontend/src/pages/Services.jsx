@@ -63,7 +63,7 @@ export default function Services() {
   ];
 
   const included = [
-    "Enlèvement à domicile ou en entreprise",
+    "Récupération à domicile ou en entreprise",
     "Livraison à l'adresse indiquée",
     "Confirmation par téléphone",
     "Suivi de votre livraison",
