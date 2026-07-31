@@ -168,7 +168,7 @@ export default function Home() {
             >
               <div className="relative">
                 <img
-                  src="https://images.pexels.com/photos/12725436/pexels-photo-12725436.jpeg"
+                  src="https://images.pexels.com/photos/6869048/pexels-photo-6869048.jpeg"
                   alt="Livreur GoLiv"
                   className="w-full h-[500px] object-cover rounded-3xl shadow-2xl"
                 />
@@ -186,7 +186,7 @@ export default function Home() {
                 <div className="absolute -top-4 -right-4 bg-white rounded-2xl p-4 shadow-lg border border-slate-100">
                   <div className="flex items-center gap-2">
                     <Package className="w-5 h-5 text-sky-500" />
-                    <span className="font-semibold text-slate-900">En route...</span>
+                    <span className="font-semibold text-slate-900"></span>
                   </div>
                 </div>
               </div>

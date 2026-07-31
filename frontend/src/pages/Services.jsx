@@ -33,13 +33,6 @@ export default function Services() {
 
   const urgencyLevels = [
     {
-      icon: <Clock className="w-6 h-6" />,
-      name: "Standard",
-      delay: "24 - 48h",
-      description: "Livraison économique pour les envois non urgents",
-      color: "bg-slate-100 text-slate-700"
-    },
-    {
       icon: <Zap className="w-6 h-6" />,
       name: "Express",
       delay: "Même jour",
@@ -63,7 +56,7 @@ export default function Services() {
   ];
 
   const included = [
-    "Enlèvement à domicile ou en entreprise",
+    "Récupération à domicile ou en entreprise",
     "Livraison à l'adresse indiquée",
     "Confirmation par téléphone",
     "Suivi de votre livraison",

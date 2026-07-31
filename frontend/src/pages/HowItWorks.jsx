@@ -20,7 +20,7 @@ export default function HowItWorks() {
     {
       number: "03",
       icon: <Truck className="w-8 h-8" />,
-      title: "Enlèvement",
+      title: "Récupération",
       description: "Un de nos livreurs professionnels se présente à l'adresse indiquée pour récupérer votre colis en toute sécurité."
     },
     {

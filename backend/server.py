@@ -38,6 +38,11 @@ RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 
+# Twilio SMS configuration
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER')
+
 # Create the main app
 app = FastAPI(title="GoLiv Logistique API")
 
@@ -367,6 +372,47 @@ async def send_notification_email(subject: str, html_content: str, to_email: str
         return True
     except Exception as e:
         logger.error(f"Failed to send email: {str(e)}")
+        return False
+
+# ============ SMS NOTIFICATION HELPER ============
+
+async def send_sms_notification(to_phone: str, message: str) -> bool:
+    """
+    Send an SMS notification using Twilio.
+    Returns True if sent successfully, False otherwise.
+    """
+    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
+        logger.warning("Twilio credentials not configured - SMS not sent")
+        return False
+    
+    if not to_phone:
+        logger.warning("No phone number provided for SMS")
+        return False
+    
+    # Format phone number to E.164 if needed
+    formatted_phone = to_phone.strip()
+    if not formatted_phone.startswith('+'):
+        # Assume Benin number if no country code
+        formatted_phone = '+229' + formatted_phone.replace(' ', '')
+    else:
+        formatted_phone = formatted_phone.replace(' ', '')
+    
+    try:
+        from twilio.rest import Client
+        
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        
+        sms = client.messages.create(
+            body=message,
+            from_=TWILIO_PHONE_NUMBER,
+            to=formatted_phone
+        )
+        
+        logger.info(f"SMS sent successfully to {formatted_phone}: {sms.sid}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send SMS to {formatted_phone}: {e}")
         return False
 
 # ============ NOTIFICATION HELPERS ============
@@ -770,6 +816,10 @@ async def create_delivery_request(data: DeliveryRequestCreate):
     <p>Suivez votre colis avec le numéro: <strong>{delivery.tracking_number}</strong></p>
     """
     await send_notification_email(f"🚚 Livraison {delivery.tracking_number} - {delivery.nom}", html)
+    
+    # Send SMS confirmation to customer
+    sms_message = f"GoLiv: Votre demande de livraison a été reçue!\n\nN° de suivi: {delivery.tracking_number}\nDe: {delivery.zone_enlevement}\nVers: {delivery.zone_livraison}\nPrix: {prix_display}\n\nSuivez votre colis sur notre site."
+    await send_sms_notification(delivery.telephone, sms_message)
     
     # In-app: notify all admins
     await notify_admins(
@@ -1613,6 +1663,10 @@ async def assign_delivery_to_rider(delivery_id: str, data: AssignRider, admin: d
     """
     await send_notification_email("🚚 Nouvelle livraison assignée", html, rider['email'])
     
+    # SMS notification to customer about rider assignment
+    sms_message = f"GoLiv: Un livreur a été assigné à votre commande {delivery['tracking_number']}!\n\nLivreur: {rider['prenom']} {rider['nom']}\nVotre colis sera bientôt récupéré."
+    await send_sms_notification(delivery['telephone'], sms_message)
+    
     # In-app: notify rider of assignment
     await notify_rider_by_id(
         rider_id=rider['id'],
@@ -1731,6 +1785,10 @@ async def update_delivery_status(delivery_id: str, data: StatusUpdate, admin: di
             """
             await send_notification_email(f"🚚 {tracking} - En cours de livraison", html)
             
+            # SMS notification for en_cours
+            sms_message = f"GoLiv: Votre colis {tracking} est en cours de livraison!\n\nLivreur: {delivery.get('livreur_nom', 'Non assigné')}\nDestination: {delivery.get('zone_livraison', '')}"
+            await send_sms_notification(delivery.get('telephone', ''), sms_message)
+            
         elif new_status == "livre":
             # Notify customer that delivery is complete
             html = f"""
@@ -1749,6 +1807,10 @@ async def update_delivery_status(delivery_id: str, data: StatusUpdate, admin: di
             </div>
             """
             await send_notification_email(f"✅ {tracking} - Livraison effectuée", html)
+            
+            # SMS notification for livre
+            sms_message = f"GoLiv: Votre colis {tracking} a été livré avec succès!\n\nMerci d'avoir choisi GoLiv. Donnez-nous votre avis sur notre site!"
+            await send_sms_notification(delivery.get('telephone', ''), sms_message)
     
     return {"success": True, "message": f"Statut mis à jour: {new_status}"}
 
