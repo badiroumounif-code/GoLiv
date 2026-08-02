@@ -37,6 +37,18 @@ def session():
     return s
 
 
+@pytest.fixture(scope="module")
+def admin_token(session):
+    """Admin routes require a JWT Bearer token, not the legacy ?password= query param."""
+    resp = session.post(
+        f"{BASE_URL}/api/auth/login",
+        json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD},
+    )
+    if resp.status_code != 200:
+        pytest.skip(f"Admin login failed: {resp.status_code} {resp.text}")
+    return resp.json()["token"]
+
+
 # --------- Google Auth ---------
 
 class TestGoogleAuthSession:
@@ -129,9 +141,9 @@ EXPORT_PATHS = [
 
 
 @pytest.mark.parametrize("endpoint,filename,expected_headers", EXPORT_PATHS)
-def test_csv_export_returns_200(session, endpoint, filename, expected_headers):
-    url = f"{BASE_URL}/api/admin/export/{endpoint}?password={ADMIN_PASSWORD}"
-    resp = requests.get(url, timeout=20)
+def test_csv_export_returns_200(session, admin_token, endpoint, filename, expected_headers):
+    url = f"{BASE_URL}/api/admin/export/{endpoint}"
+    resp = requests.get(url, headers={"Authorization": f"Bearer {admin_token}"}, timeout=20)
     assert resp.status_code == 200, (
         f"/api/admin/export/{endpoint} returned {resp.status_code}: {resp.text[:300]}"
     )
@@ -155,8 +167,7 @@ def test_csv_export_returns_200(session, endpoint, filename, expected_headers):
         )
 
 
-def test_csv_export_wrong_password(session):
-    resp = requests.get(
-        f"{BASE_URL}/api/admin/export/delivery-requests?password=wrong"
-    )
+def test_csv_export_unauthorized(session):
+    """Admin export routes require a valid admin JWT; no token should be rejected."""
+    resp = requests.get(f"{BASE_URL}/api/admin/export/delivery-requests")
     assert resp.status_code == 401

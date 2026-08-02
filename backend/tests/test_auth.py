@@ -8,6 +8,19 @@ import os
 import uuid
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'plb2024')
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_admin_seeded():
+    """The admin login tests assume admin@plb.bj already exists; self-seed it
+    (idempotently, ignoring failure if it's already there) so this suite
+    doesn't depend on out-of-band setup."""
+    try:
+        requests.post(f"{BASE_URL}/api/auth/init-admin", params={"password": ADMIN_PASSWORD}, timeout=15)
+    except requests.RequestException:
+        pass
+
 
 class TestHealthAndBasics:
     """Basic health check tests"""
@@ -36,7 +49,7 @@ class TestAdminLogin:
         """Test admin login with correct credentials"""
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
             "email": "admin@plb.bj",
-            "password": "plb2024"
+            "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
         data = response.json()
@@ -189,7 +202,7 @@ class TestJWTAuthentication:
         """Get admin token for testing"""
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
             "email": "admin@plb.bj",
-            "password": "plb2024"
+            "password": ADMIN_PASSWORD
         })
         if response.status_code == 200:
             return response.json()["token"]
@@ -382,7 +395,7 @@ class TestLoginAndRedirection:
         """Test admin login returns admin role for redirection"""
         response = requests.post(f"{BASE_URL}/api/auth/login", json={
             "email": "admin@plb.bj",
-            "password": "plb2024"
+            "password": ADMIN_PASSWORD
         })
         assert response.status_code == 200
         data = response.json()
