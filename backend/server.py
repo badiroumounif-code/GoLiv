@@ -2079,10 +2079,19 @@ async def export_finances(admin: dict = Depends(get_admin_user)):
 # Include the router in the main app
 app.include_router(api_router)
 
+# Defaults to the known deployment + local dev origins; override with a
+# comma-separated CORS_ORIGINS env var for other environments.
+DEFAULT_CORS_ORIGINS = "https://plb-track.preview.emergentagent.com,http://localhost:3000"
+cors_origins = [
+    origin.strip()
+    for origin in os.environ.get('CORS_ORIGINS', DEFAULT_CORS_ORIGINS).split(',')
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
