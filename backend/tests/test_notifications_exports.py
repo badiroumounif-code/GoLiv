@@ -149,8 +149,9 @@ class TestNotificationHookOnAdminAssign:
         rider_id = rider["id"]
         # approve so user is linked
         ar = requests.patch(
-            f"{BASE_URL}/api/admin/riders/{rider_id}/status?password={ADMIN_PWD}",
+            f"{BASE_URL}/api/admin/riders/{rider_id}/status",
             json={"status": "accepte"},
+            headers=admin_headers,
         )
         assert ar.status_code == 200, ar.text
 
@@ -170,8 +171,9 @@ class TestNotificationHookOnAdminAssign:
 
         # assign
         asr = requests.patch(
-            f"{BASE_URL}/api/admin/delivery-requests/{delivery_id}/assign?password={ADMIN_PWD}",
+            f"{BASE_URL}/api/admin/delivery-requests/{delivery_id}/assign",
             json={"livreur_id": rider_id},
+            headers=admin_headers,
         )
         assert asr.status_code == 200, asr.text
 
@@ -268,9 +270,9 @@ class TestMarkAsRead:
 
 # ---------- CSV exports ----------
 class TestCsvExports:
-    def test_finances_export_csv(self):
+    def test_finances_export_csv(self, admin_headers):
         r = requests.get(
-            f"{BASE_URL}/api/admin/export/finances?password={ADMIN_PWD}"
+            f"{BASE_URL}/api/admin/export/finances", headers=admin_headers
         )
         assert r.status_code == 200, r.text
         assert "text/csv" in r.headers.get("content-type", "")
@@ -284,8 +286,8 @@ class TestCsvExports:
         ]:
             assert col in first_line, f"Missing column {col} in header: {first_line}"
 
-    def test_finances_export_wrong_password(self):
-        r = requests.get(f"{BASE_URL}/api/admin/export/finances?password=wrong")
+    def test_finances_export_unauthorized(self):
+        r = requests.get(f"{BASE_URL}/api/admin/export/finances")
         assert r.status_code == 401
 
     @pytest.mark.parametrize(
@@ -310,8 +312,8 @@ class TestCsvExports:
             "/api/admin/export/feedback",
         ],
     )
-    def test_existing_exports_still_work(self, path):
-        r = requests.get(f"{BASE_URL}{path}?password={ADMIN_PWD}")
+    def test_existing_exports_still_work(self, path, admin_headers):
+        r = requests.get(f"{BASE_URL}{path}", headers=admin_headers)
         assert r.status_code == 200, f"{path}: {r.text}"
         assert "text/csv" in r.headers.get("content-type", "")
         # header line should exist
