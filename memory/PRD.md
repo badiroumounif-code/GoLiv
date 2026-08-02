@@ -77,7 +77,7 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 - Renamed all textual references "PLB Logistique" → "GoLiv Logistique"
 - New tracking format: `GOLIV-YYYY-XXXXXX` (legacy `PLB-` numbers remain readable for backward compat)
 - Updated email templates, API title, page labels, alt texts, FAQ examples
-- Preserved: admin credentials (`admin@plb.bj` / `plb2024`), JWT secret, localStorage keys, deployment URL
+- Preserved: admin credentials (see `memory/test_credentials.md`, values not committed), JWT secret, localStorage keys, deployment URL
 
 ### Phase 7 - UI/Layout Improvements ✅ (December 2025)
 - **CRITICAL FIX**: `App.css` was never imported into `App.js` — all custom utility classes were dead. Now properly imported.
@@ -163,7 +163,7 @@ Build a fully functional, interactive logistics website for GoLiv Logistique, op
 
 ## Credentials
 
-**Admin:** admin@plb.bj / plb2024
+**Admin:** see `memory/test_credentials.md` — real values live in the environment's `.env` / secrets manager, never in this repo.
 
 ---
 

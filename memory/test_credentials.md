@@ -1,18 +1,22 @@
 # Test Credentials — GoLiv Logistique
 
-> Note: legacy email/password preserved during PLB → GoLiv rebrand to avoid breaking auth and existing sessions.
+> Real credentials must NOT be committed to this repo. Store them in a local,
+> gitignored `.env` (or your secrets manager) — never in this file.
+> Any password previously written here has been exposed via Git history and
+> must be rotated (see `backend/server.py`'s `ADMIN_PASSWORD` / `JWT_SECRET`
+> env vars).
 
 ## Admin
 - **Email:** `admin@plb.bj`
-- **Password:** `plb2024`
+- **Password:** set via the `ADMIN_PASSWORD` env var (see `.env`, not committed)
 - **Role:** `admin`
 - **Login URL:** `/connexion`
 - **Dashboard:** `/admin`
 - **Init endpoint (creates if missing):** `POST /api/auth/init-admin`
 
 ## Existing Rider (created in previous session, may or may not still exist)
-- **Email:** `badirouadeniyi@gmail.com`
-- **Password:** `PLB7514` (legacy auto-generated; kept for backward compat)
+- **Email:** kept in local `.env` / secrets manager, not committed
+- **Password:** kept in local `.env` / secrets manager, not committed
 - **Dashboard:** `/espace-livreur`
 
 ## Google OAuth Users
@@ -23,7 +27,7 @@
 
 ## How to seed a fresh admin
 ```bash
-curl -X POST "$REACT_APP_BACKEND_URL/api/auth/init-admin?password=plb2024"
+curl -X POST "$REACT_APP_BACKEND_URL/api/auth/init-admin?password=$ADMIN_PASSWORD"
 ```
 
 ## API base URL

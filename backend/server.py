@@ -26,10 +26,14 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # Admin password
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'plb2024')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+if not ADMIN_PASSWORD:
+    raise RuntimeError("ADMIN_PASSWORD environment variable must be set")
 
 # JWT Settings
-JWT_SECRET = os.environ.get('JWT_SECRET', 'plb-logistique-secret-key-2024')
+JWT_SECRET = os.environ.get('JWT_SECRET')
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET environment variable must be set")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24 * 7  # 7 days
 
@@ -2075,10 +2079,19 @@ async def export_finances(admin: dict = Depends(get_admin_user)):
 # Include the router in the main app
 app.include_router(api_router)
 
+# Defaults to the known deployment + local dev origins; override with a
+# comma-separated CORS_ORIGINS env var for other environments.
+DEFAULT_CORS_ORIGINS = "https://plb-track.preview.emergentagent.com,http://localhost:3000"
+cors_origins = [
+    origin.strip()
+    for origin in os.environ.get('CORS_ORIGINS', DEFAULT_CORS_ORIGINS).split(',')
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
