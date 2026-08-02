@@ -1,0 +1,7 @@
+"""MongoDB client/database handle, shared across all modules."""
+from motor.motor_asyncio import AsyncIOMotorClient
+
+from config import DB_NAME, MONGO_URL
+
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
